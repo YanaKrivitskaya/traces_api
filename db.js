@@ -22,10 +22,14 @@ async function initialize(){
     //init User model
     db.User = require('./auth/user.model')(sequelize);
     db.RefreshToken = require('./auth/refreshToken.model')(sequelize);
+    db.Note = require('./notes/note.model')(sequelize);
 
     //relations
     db.User.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
     db.RefreshToken.belongsTo(db.User);
+
+    db.User.hasMany(db.Note, {onDelete: 'CASCADE'});
+    db.Note.belongsTo(db.User);
 
     try {
         await sequelize.authenticate();
