@@ -23,6 +23,7 @@ async function initialize(){
     db.User = require('./auth/user.model')(sequelize);
     db.RefreshToken = require('./auth/refreshToken.model')(sequelize);
     db.Note = require('./notes/note.model')(sequelize);
+    db.Tag = require('./tags/tag.model')(sequelize);
 
     //relations
     db.User.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
@@ -30,6 +31,9 @@ async function initialize(){
 
     db.User.hasMany(db.Note, {onDelete: 'CASCADE'});
     db.Note.belongsTo(db.User);
+
+    db.User.hasMany(db.Tag, {onDelete: 'CASCADE'});
+    db.Tag.belongsTo(db.User);
 
     try {
         await sequelize.authenticate();

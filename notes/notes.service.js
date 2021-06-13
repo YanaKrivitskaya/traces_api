@@ -1,4 +1,5 @@
 const db = require('../db');
+const auth = require('../auth/auth.service');
 
 module.exports = {
     getNotes,
@@ -8,32 +9,27 @@ module.exports = {
 }
 
 async function getNotes(userId){
-    const user = await validateUser(userId);
+    const user = await auth.getById(userId);
     
-    return notes = await user.getNotes();
+    return notes = await user.getNotes({where: {deleted: 0}});
 }
 
 async function createNote(note, userId){
-    const user = await validateUser(userId);    
+    const user = await auth.getById(userId);
 
     var newNote = await db.Note.create(note);
-    newNote.setUser(user);
-    return getNoteById(newNote.id);
+    await newNote.setUser(user);
+    return newNote;
 }
 
 async function updateNote(updNote, noteId){
     const note = await getNoteById(noteId);
-    if(!note) throw 'Note not found';
-
+    
     return note.update(updNote);
 }
 
 async function getNoteById(noteId){
-    return await db.Note.findByPk(noteId);
-}
-
-async function validateUser(userId){
-    const user = await db.User.findByPk(userId);
-    if(!user) throw "User not found";
-    return user;
+    const note = await db.Note.findByPk(noteId);
+    if(!note) throw 'Note not found';
+    return note;
 }

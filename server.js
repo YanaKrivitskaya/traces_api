@@ -15,14 +15,13 @@ app.use(cookieParser());
 
 app.use(cors());
 
-app.use(errorHandler);
+
 
 app.use('/auth', require('./auth/auth.controller'));
 app.use('/notes', require('./notes/notes.controller'))
+app.use('/tags', require('./tags/tags.controller'))
 
-app.get('/', (req, res) =>{
-    res.send("hello");
-});
+app.use(errorHandler);
 
 app.listen(port, ()=>{
     console.log(`app is listening at http://localhost:${port}`);
