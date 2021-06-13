@@ -18,6 +18,7 @@ app.use(cors());
 app.use(errorHandler);
 
 app.use('/auth', require('./auth/auth.controller'));
+app.use('/notes', require('./notes/notes.controller'))
 
 app.get('/', (req, res) =>{
     res.send("hello");
