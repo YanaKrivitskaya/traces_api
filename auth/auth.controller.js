@@ -1,21 +1,41 @@
 const express = require('express');
 const router = express.Router();
+const Joi = require('joi');
 const userService = require('./auth.service');
 const authorize = require('../helpers/jwt_helper');
+const validateRequest = require('../helpers/validate_request');
 
 module.exports = router;
 
 //routes
-router.post('/register', register);
-router.post('/login', authenticate);
+router.post('/register', registerSchema, register);
+router.post('/login', authenticateSchema, authenticate);
 router.post('/refresh-token', refreshToken);
-router.post('/revoke-token', authorize(), revokeToken);
+router.post('/revoke-token', authorize(), revokeTokenSchema, revokeToken);
 router.get('/users/:id', authorize(), getById);
+
+function registerSchema(req, res, next) {
+    const schema = Joi.object({
+        name: Joi.string().required(),        
+        email: Joi.string().email().required(),
+        password: Joi.string().min(6).required()
+        //confirmPassword: Joi.string().valid(Joi.ref('password')).required(),       
+    });
+    validateRequest(req, next, schema);
+}
 
 function register(req, res, next){
     userService.createUser(req.body)
         .then(()=> res.json({message: 'Registration successful'}))
         .catch(next);
+}
+
+function authenticateSchema(req, res, next) {
+    const schema = Joi.object({
+        email: Joi.string().required(),
+        password: Joi.string().required()
+    });
+    validateRequest(req, next, schema);
 }
 
 function authenticate(req, res, next){
@@ -35,6 +55,13 @@ function refreshToken(req, res, next){
             res.json({user, accessToken})
         })
         .catch(next);
+}
+
+function revokeTokenSchema(req, res, next) {
+    const schema = Joi.object({
+        token: Joi.string().empty('')
+    });
+    validateRequest(req, next, schema);
 }
 
 function revokeToken(req, res, next){    
