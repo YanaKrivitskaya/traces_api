@@ -7,11 +7,18 @@ const Joi = require('joi');
 module.exports = router;
 
 router.get('/', authorize(), getNotes);
+router.get('/:id', authorize(), getNoteById);
 router.post('/', authorize(), createNote);
 
 function getNotes(req, res, next){
     notesService.getNotes(req.user.id)
     .then((notes) => res.json({notes}))
+    .catch(next);
+}
+
+function getNoteById(req, res, next){
+    notesService.getNoteById(req.params.id)
+    .then((note) => res.json({note}))
     .catch(next);
 }
 
