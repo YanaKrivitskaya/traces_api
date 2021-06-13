@@ -3,6 +3,7 @@ const db = require('../db');
 module.exports = {
     getNotes,
     createNote,
+    updateNote,
     getNoteById
 }
 
@@ -18,6 +19,13 @@ async function createNote(note, userId){
     var newNote = await db.Note.create(note);
     newNote.setUser(user);
     return getNoteById(newNote.id);
+}
+
+async function updateNote(updNote, noteId){
+    const note = await getNoteById(noteId);
+    if(!note) throw 'Note not found';
+
+    return note.update(updNote);
 }
 
 async function getNoteById(noteId){
