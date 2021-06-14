@@ -1,4 +1,5 @@
-const { Sequelize } = require('sequelize');
+//const { Sequelize } = require('sequelize');
+const Sequelize = require("sequelize").Sequelize
 
 module.exports = db = {};
 
@@ -24,6 +25,7 @@ async function initialize(){
     db.RefreshToken = require('./auth/refreshToken.model')(sequelize);
     db.Note = require('./notes/note.model')(sequelize);
     db.Tag = require('./tags/tag.model')(sequelize);
+    db.NoteTag = require('./notes/note-tag.model')(sequelize);
 
     //relations
     db.User.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
@@ -34,6 +36,9 @@ async function initialize(){
 
     db.User.hasMany(db.Tag, {onDelete: 'CASCADE'});
     db.Tag.belongsTo(db.User);
+
+    db.Note.belongsToMany(db.Tag, {through: 'note_tag', as: 'tags', foreignKey: 'noteId' });
+    db.Tag.belongsToMany(db.Note, {through: 'note_tag', as: 'notes', foreignKey: 'tagId'});
 
     try {
         await sequelize.authenticate();
