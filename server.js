@@ -26,3 +26,6 @@ app.use(errorHandler);
 app.listen(port, ()=>{
     console.log(`app is listening at http://localhost:${port}`);
 });
+
+const all_routes = require('express-list-endpoints');
+console.log(all_routes(app));
