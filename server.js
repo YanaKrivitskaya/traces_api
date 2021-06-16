@@ -15,8 +15,6 @@ app.use(cookieParser());
 
 app.use(cors());
 
-
-
 app.use('/auth', require('./auth/auth.controller'));
 app.use('/notes', require('./notes/notes.controller'))
 app.use('/tags', require('./tags/tags.controller'))

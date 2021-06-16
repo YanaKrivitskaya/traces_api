@@ -87,7 +87,7 @@ async function getRefreshToken(token){
 }
 
 function omitPass(user){
-    const {Password, ...userWithoutPassword} = user;
+    const {password, ...userWithoutPassword} = user;
     return userWithoutPassword
 }
 
