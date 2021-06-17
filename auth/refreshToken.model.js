@@ -11,11 +11,11 @@ module.exports = (sequilize, type) => {
         replacedByToken: {type:DataTypes.STRING(250)},
         isExpired: {
             type: DataTypes.VIRTUAL,
-            get() { return Date.now() >= this.ExpirationDate; }
+            get() { return Date.now() >= this.expirationDate; }
         },
         isRevoked: {
             type: DataTypes.VIRTUAL,
-            get() { return this.RevokedDate != null; }
+            get() { return this.revokedDate != null; }
         },
         isActive: {
             type: DataTypes.VIRTUAL,

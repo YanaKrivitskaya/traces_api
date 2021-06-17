@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 8080;
+const errorHandler = require('./helpers/error_handler');
 
 var connection  = require('../traces_api/db');
 
@@ -15,11 +16,14 @@ app.use(cookieParser());
 app.use(cors());
 
 app.use('/auth', require('./auth/auth.controller'));
+app.use('/notes', require('./notes/notes.controller'))
+app.use('/tags', require('./tags/tags.controller'))
 
-app.get('/', (req, res) =>{
-    res.send("hello");
-});
+app.use(errorHandler);
 
 app.listen(port, ()=>{
     console.log(`app is listening at http://localhost:${port}`);
 });
+
+const all_routes = require('express-list-endpoints');
+console.log(all_routes(app));
