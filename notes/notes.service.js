@@ -13,13 +13,25 @@ module.exports = {
 }
 
 async function getNotes(userId){
-    const user = await auth.getById(userId);
+    const user = await auth.getUserById(userId);
     
-    return notes = await user.getNotes({where: {deleted: 0}, include: db.Tag });
+    return notes = await user.getNotes({
+        where: {deleted: 0}, 
+        include: [
+            {
+                model: db.Tag,
+                //attributes: ["id", "name"],
+                as: "tags",
+                /*through: {
+                    attributes: [],
+                },*/
+            }
+        ]
+    });
 }
 
 async function createNote(note, userId){
-    const user = await auth.getById(userId);
+    const user = await auth.getUserById(userId);
 
     var newNote = await db.Note.create(note);
     await newNote.setUser(user);
