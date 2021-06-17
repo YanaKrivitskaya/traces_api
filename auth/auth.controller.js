@@ -10,9 +10,9 @@ module.exports = router;
 //routes
 router.post('/register', registerSchema, register);
 router.post('/login', authenticateSchema, authenticate);
-router.post('/refresh-token', refreshToken);
-router.post('/revoke-token', authorize(), revokeTokenSchema, revokeToken);
-router.get('/users/:id', authorize(), getById);
+router.post('/refresh-token', tokenSchema, refreshToken);
+router.post('/revoke-token', authorize(), tokenSchema, revokeToken);
+router.get('/users/:id', authorize(), getUserById);
 
 function registerSchema(req, res, next) {
     const schema = Joi.object({
@@ -48,7 +48,7 @@ function authenticate(req, res, next){
 }
 
 function refreshToken(req, res, next){    
-    const token = req.cookies.refreshToken;
+    const token = req.body.token;
     userService.refreshToken({token})
         .then(({user, accessToken, refreshToken}) => {
             setCookieToken(res, refreshToken),
@@ -57,9 +57,15 @@ function refreshToken(req, res, next){
         .catch(next);
 }
 
-function revokeTokenSchema(req, res, next) {
+function getUserById(req, res, next){
+    userService.getUserById(req.params.id)
+        .then((user) => res.json(user))
+        .catch(next);
+}
+
+function tokenSchema(req, res, next) {
     const schema = Joi.object({
-        token: Joi.string().empty('')
+        token: Joi.string().required()
     });
     validateRequest(req, next, schema);
 }
@@ -77,12 +83,6 @@ function revokeToken(req, res, next){
         .then(() => {            
             res.json({message: 'Token revoked'});
         })
-        .catch(next);
-}
-
-function getById(req, res, next){
-    userService.getById(req.params.id)
-        .then((user) => res.json(user))
         .catch(next);
 }
 
