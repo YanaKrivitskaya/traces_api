@@ -9,13 +9,13 @@ module.exports = {
 }
 
 async function getTags(userId){
-    const user = await auth.getById(userId);
+    const user = await auth.getUserById(userId);
 
     return notes = await user.getTags({where: {deleted: 0}});
 }
 
 async function createTag(tag, userId){
-    const user = await auth.getById(userId);
+    const user = await auth.getUserById(userId);    
 
     var newTag = await db.Tag.create(tag);
     await newTag.setUser(user);

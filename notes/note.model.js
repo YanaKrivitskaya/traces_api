@@ -8,6 +8,7 @@ module.exports = (sequelize, type) => {
         createdDate:{type:DataTypes.DATE, allowNull: false},
         updatedDate:{type:DataTypes.DATE},
         deleted:{type:DataTypes.BOOLEAN, defaultValue: 0},
+        deletedDate:{type:DataTypes.DATE},
     },{
         createdAt: 'createdDate',
         updatedAt: 'updatedDate'
