@@ -50,8 +50,7 @@ function authenticate(req, res, next){
 function refreshToken(req, res, next){    
     const token = req.body.token;
     userService.refreshToken({token})
-        .then(({user, accessToken, refreshToken}) => {
-            setCookieToken(res, refreshToken),
+        .then(({user, accessToken}) => {            
             res.json({user, accessToken})
         })
         .catch(next);

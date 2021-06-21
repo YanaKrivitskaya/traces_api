@@ -15,7 +15,7 @@ async function getTags(userId){
 }
 
 async function createTag(tag, userId){
-    const user = await auth.getUserById(userId);
+    const user = await auth.getUserById(userId);    
 
     var newTag = await db.Tag.create(tag);
     await newTag.setUser(user);
