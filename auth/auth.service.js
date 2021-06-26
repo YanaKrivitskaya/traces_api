@@ -26,7 +26,7 @@ async function createUser(params){
     await db.User.create(params);
 }
 
-async function authenticate({email, password}){
+async function authenticate({email, password}, device){
     const user = await db.User.scope('withPass').findOne({
         where: {email: email}
     });    
@@ -40,7 +40,7 @@ async function authenticate({email, password}){
     var refreshToken = await getRefreshTokenByUserId(user.id);    
     
     if(!refreshToken || !refreshToken.isActive) {
-        const newRefreshToken = generateRefreshToken(user);
+        const newRefreshToken = generateRefreshToken(user, device);
         await newRefreshToken.save();
         if(refreshToken!= null && !refreshToken.isActive){
             refreshToken.revokedDate = Date.now();
@@ -57,34 +57,33 @@ async function authenticate({email, password}){
         refreshToken: refreshToken.token};
 }
 
-async function refreshToken({token}){
-    const refreshToken = await getRefreshToken(token);    
+async function refreshToken({token}, device){
+    const refreshToken = await getRefreshToken(token, device);    
 
     const user  = await refreshToken.getUser();
+
+    // replace old refresh token with a new one and save
+    const newRefreshToken = generateRefreshToken(user, device);
+    refreshToken.revokedDate = Date.now();
+    refreshToken.revokedByDevice = device;
+    refreshToken.replacedByToken = newRefreshToken.token;
+    await refreshToken.save();
+    await newRefreshToken.save();
+
     const jwt = generateJwt(user);
 
     return {
         user: omitPass(user.get()), 
-        accessToken: jwt};    
+        accessToken: jwt,
+        refreshToken: newRefreshToken.token};    
 }
 
-async function revokeToken({refreshToken}){
-    const token = await getRefreshToken(refreshToken);    
+async function revokeToken({token}, device){
+    const refreshToken = await getRefreshToken(token, device);    
 
-    token.RevokeDate = Date.now();
-    await token.save();
-}
-
-async function getCurrentUser({token}){
-    const refreshToken = await getRefreshToken(token);
-    
-    var user = await refreshToken.getUser();
-    
-    const accessToken = generateJwt(user);
-    
-    return {
-        user: omitPass(user.get()), 
-        accessToken: accessToken}
+    refreshToken.revokedDate = Date.now();
+    refreshToken.revokedByDevice = device;
+    await refreshToken.save();
 }
 
 async function getUserById(id){
@@ -93,8 +92,8 @@ async function getUserById(id){
     return user;
 }
 
-async function getRefreshToken(token){
-    const refreshToken =  await db.RefreshToken.findOne({ where: { token: token } });
+async function getRefreshToken(token, device){
+    const refreshToken =  await db.RefreshToken.findOne({ where: { token: token, deviceId: device } });
     if(!refreshToken || !refreshToken.isActive) throw 'UnauthorizedError';
     return refreshToken;
 }
@@ -114,10 +113,11 @@ function generateJwt(user){
 }
 
 //expires in 7 days
-function generateRefreshToken(user){
+function generateRefreshToken(user, device){
     return new db.RefreshToken({
         userId: user.id,
         token: crypto.randomBytes(40).toString('hex'),
-        expirationDate: new Date(Date.now() + 7*24*60*60*1000)
+        expirationDate: new Date(Date.now() + 7*24*60*60*1000),
+        deviceId: device
     });
 }
