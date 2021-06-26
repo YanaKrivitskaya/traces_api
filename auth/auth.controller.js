@@ -39,7 +39,8 @@ function authenticateSchema(req, res, next) {
 }
 
 function authenticate(req, res, next){
-    userService.authenticate(req.body)
+    var device = req.headers["device-info"];
+    userService.authenticate(req.body, device)
         .then(({user, accessToken, refreshToken}) => {
             setCookieToken(res, refreshToken),
             res.json({user, accessToken})
@@ -48,9 +49,10 @@ function authenticate(req, res, next){
 }
 
 function refreshToken(req, res, next){    
-    const token = req.body.token;
-    userService.refreshToken({token})
-        .then(({user, accessToken}) => {            
+    var device = req.headers["device-info"];
+    userService.refreshToken(req.body, device)
+        .then(({user, accessToken, refreshToken}) => {    
+            setCookieToken(res, refreshToken),        
             res.json({user, accessToken})
         })
         .catch(next);
@@ -71,6 +73,7 @@ function tokenSchema(req, res, next) {
 
 function revokeToken(req, res, next){    
     const token = req.body.token || req.cookies.refreshToken;
+    var device = req.headers["device-info"];
 
     if(!token) return res.status(400).json({message: 'Token is required'});
 
@@ -78,7 +81,7 @@ function revokeToken(req, res, next){
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    userService.revoke({token})
+    userService.revokeToken({token}, device)
         .then(() => {            
             res.json({message: 'Token revoked'});
         })
