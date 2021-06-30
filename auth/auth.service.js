@@ -4,16 +4,16 @@ const crypto = require('crypto');
 const db = require('../db');
 
 module.exports = {
-    createUser, 
+    createAccount, 
     authenticate,
-    getUserById,    
+    getAccountById,    
     refreshToken,
     revokeToken
 };
 
-async function createUser(params){
+async function createAccount(params){
     //validate
-    if(await db.User.findOne({where: {email: params.email}})){
+    if(await db.Account.findOne({where: {email: params.email}})){
         throw `Email ${params.email} is already taken`;
     }
 
@@ -22,25 +22,38 @@ async function createUser(params){
         params.password = await bcrypt.hash(params.password, 10);
     }
 
-    //save user
-    await db.User.create(params);
+    //save Account
+    var newAccount = await db.Account.create(params);
+
+    //create user entity
+    var user = await newAccount.createUser({name: params.name, createdByAccountId: newAccount.id});
+
+    //create family group
+    var group = await newAccount.createGroup({name: "Family", });
+    await group.addUser(user);
+
+    const userGroup = await db.UserGroup.findOne({where: {groupId: group.id, userId: user.id}});    
+    userGroup.isOwner = true;
+    await userGroup.save();
+
+    return newAccount;
 }
 
 async function authenticate({email, password}, device){
-    const user = await db.User.scope('withPass').findOne({
+    const account = await db.Account.scope('withPass').findOne({
         where: {email: email}
     });    
 
-    if(!user || !(await bcrypt.compare(password, user.password))){        
+    if(!account || !(await bcrypt.compare(password, account.password))){        
         throw "Username or password is incorrect";
     }
 
-    const accessToken = generateJwt(user); 
+    const accessToken = generateJwt(account); 
 
-    var refreshToken = await getRefreshTokenByUserId(user.id);    
+    var refreshToken = await getRefreshTokenByAccountId(account.id, device);    
     
     if(!refreshToken || !refreshToken.isActive) {
-        const newRefreshToken = generateRefreshToken(user, device);
+        const newRefreshToken = generateRefreshToken(account, device);
         await newRefreshToken.save();
         if(refreshToken!= null && !refreshToken.isActive){
             refreshToken.revokedDate = Date.now();
@@ -52,7 +65,7 @@ async function authenticate({email, password}, device){
     }
     
     return {
-        user: omitPass(user.get()), 
+        account: omitPass(account.get()), 
         accessToken: accessToken, 
         refreshToken: refreshToken.token};
 }
@@ -60,20 +73,20 @@ async function authenticate({email, password}, device){
 async function refreshToken({token}, device){
     const refreshToken = await getRefreshToken(token, device);    
 
-    const user  = await refreshToken.getUser();
+    const account  = await refreshToken.getAccount();
 
     // replace old refresh token with a new one and save
-    const newRefreshToken = generateRefreshToken(user, device);
+    const newRefreshToken = generateRefreshToken(account, device);
     refreshToken.revokedDate = Date.now();
     refreshToken.revokedByDevice = device;
     refreshToken.replacedByToken = newRefreshToken.token;
     await refreshToken.save();
     await newRefreshToken.save();
 
-    const jwt = generateJwt(user);
+    const jwt = generateJwt(account);
 
     return {
-        user: omitPass(user.get()), 
+        account: omitPass(account.get()), 
         accessToken: jwt,
         refreshToken: newRefreshToken.token};    
 }
@@ -86,10 +99,22 @@ async function revokeToken({token}, device){
     await refreshToken.save();
 }
 
-async function getUserById(id){
-    const user = await db.User.findByPk(id);    
-    if(!user) throw "User not found";
-    return user;
+async function getAccountById(id){
+    const account = await db.Account.findByPk(id/*, {include: [
+        {
+            model: db.User,            
+            as: "user",
+            attributes: ["name"],
+            include: {
+                model: db.Group,
+                as: "groups",
+              }
+        }
+    ]}*/);
+    
+
+    if(!account) throw "Account not found";
+    return account;
 }
 
 async function getRefreshToken(token, device){
@@ -98,24 +123,24 @@ async function getRefreshToken(token, device){
     return refreshToken;
 }
 
-async function getRefreshTokenByUserId(userId){
-    const refreshToken =  await db.RefreshToken.findOne({ where: { userId: userId } });    
+async function getRefreshTokenByAccountId(accountId, device){
+    const refreshToken =  await db.RefreshToken.findOne({ where: { accountId: accountId, deviceId: device } });    
     return refreshToken;
 }
 
-function omitPass(user){
-    const {password, ...userWithoutPassword} = user;
-    return userWithoutPassword
+function omitPass(account){
+    const {password, ...accountWithoutPassword} = account;
+    return accountWithoutPassword
 }
 
-function generateJwt(user){
-    return jwt.sign({sub: user.id}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: process.env.ACCESS_TOKEN_LIFE});
+function generateJwt(account){
+    return jwt.sign({sub: account.id}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: process.env.ACCESS_TOKEN_LIFE});
 }
 
 //expires in 7 days
-function generateRefreshToken(user, device){
+function generateRefreshToken(account, device){
     return new db.RefreshToken({
-        userId: user.id,
+        accountId: account.id,
         token: crypto.randomBytes(40).toString('hex'),
         expirationDate: new Date(Date.now() + 7*24*60*60*1000),
         deviceId: device

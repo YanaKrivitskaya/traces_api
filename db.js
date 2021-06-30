@@ -20,22 +20,34 @@ async function initialize(){
         }
     );
 
-    //init User model
+    //init Account model
+    db.Account = require('./auth/account.model')(sequelize);
     db.User = require('./auth/user.model')(sequelize);
+    db.Group = require('./profile/group.model')(sequelize);
+    db.UserGroup = require('./profile/user-group.model')(sequelize);
     db.RefreshToken = require('./auth/refreshToken.model')(sequelize);
     db.Note = require('./notes/note.model')(sequelize);
     db.Tag = require('./tags/tag.model')(sequelize);
     db.NoteTag = require('./notes/note-tag.model')(sequelize);
 
     //relations
-    db.User.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
-    db.RefreshToken.belongsTo(db.User);
+    db.Account.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
+    db.RefreshToken.belongsTo(db.Account);
 
-    db.User.hasMany(db.Note, {onDelete: 'CASCADE'});
-    db.Note.belongsTo(db.User);
+    db.Account.hasOne(db.User);
+    db.User.belongsTo(db.Account);
 
-    db.User.hasMany(db.Tag, {onDelete: 'CASCADE'});
-    db.Tag.belongsTo(db.User);
+    db.Account.hasMany(db.Group, {foreignKey: 'ownerAccountId'});
+    db.Group.belongsTo(db.Account, {foreignKey: 'ownerAccountId'});
+
+    db.Group.belongsToMany(db.User, {through: 'user_group', as: 'users', foreignKey: 'groupId'});
+    db.User.belongsToMany(db.Group, {through: 'user_group', as: 'groups', foreignKey: 'userId'});
+
+    db.Account.hasMany(db.Note, {onDelete: 'CASCADE'});
+    db.Note.belongsTo(db.Account);
+
+    db.Account.hasMany(db.Tag, {onDelete: 'CASCADE'});
+    db.Tag.belongsTo(db.Account);
 
     db.Note.belongsToMany(db.Tag, {through: 'note_tag', as: 'tags', foreignKey: 'noteId' });
     db.Tag.belongsToMany(db.Note, {through: 'note_tag', as: 'notes', foreignKey: 'tagId'});

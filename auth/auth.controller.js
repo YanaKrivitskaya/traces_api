@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Joi = require('joi');
-const userService = require('./auth.service');
+const authService = require('./auth.service');
 const authorize = require('../helpers/jwt_helper');
 const validateRequest = require('../helpers/validate_request');
 
@@ -12,7 +12,7 @@ router.post('/register', registerSchema, register);
 router.post('/login', authenticateSchema, authenticate);
 router.post('/refresh-token', tokenSchema, refreshToken);
 router.post('/revoke-token', authorize(), tokenSchema, revokeToken);
-router.get('/users/:id', authorize(), getUserById);
+//router.get('/users/:id', authorize(), getUserById);
 
 function registerSchema(req, res, next) {
     const schema = Joi.object({
@@ -25,7 +25,7 @@ function registerSchema(req, res, next) {
 }
 
 function register(req, res, next){
-    userService.createUser(req.body)
+    authService.createAccount(req.body)
         .then(()=> res.json({message: 'Registration successful'}))
         .catch(next);
 }
@@ -40,29 +40,29 @@ function authenticateSchema(req, res, next) {
 
 function authenticate(req, res, next){
     var device = req.headers["device-info"];
-    userService.authenticate(req.body, device)
-        .then(({user, accessToken, refreshToken}) => {
+    authService.authenticate(req.body, device)
+        .then(({account, accessToken, refreshToken}) => {
             setCookieToken(res, refreshToken),
-            res.json({user, accessToken})
+            res.json({account, accessToken})
         })
         .catch(next);
 }
 
 function refreshToken(req, res, next){    
     var device = req.headers["device-info"];
-    userService.refreshToken(req.body, device)
-        .then(({user, accessToken, refreshToken}) => {    
+    authService.refreshToken(req.body, device)
+        .then(({account, accessToken, refreshToken}) => {    
             setCookieToken(res, refreshToken),        
-            res.json({user, accessToken})
+            res.json({account, accessToken})
         })
         .catch(next);
 }
 
-function getUserById(req, res, next){
-    userService.getUserById(req.params.id)
+/*function getUserById(req, res, next){
+    authService.getAccountById(req.params.id)
         .then((user) => res.json(user))
         .catch(next);
-}
+}*/
 
 function tokenSchema(req, res, next) {
     const schema = Joi.object({
@@ -81,7 +81,7 @@ function revokeToken(req, res, next){
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    userService.revokeToken({token}, device)
+    authService.revokeToken({token}, device)
         .then(() => {            
             res.json({message: 'Token revoked'});
         })
