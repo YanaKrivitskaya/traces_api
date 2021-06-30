@@ -8,7 +8,8 @@ module.exports = {
     authenticate,
     getAccountById,    
     refreshToken,
-    revokeToken
+    revokeToken,
+    getUserByAccountId
 };
 
 async function createAccount(params){
@@ -115,6 +116,12 @@ async function getAccountById(id){
 
     if(!account) throw "Account not found";
     return account;
+}
+
+async function getUserByAccountId(accountId){
+    const user = await db.User.findOne({where: {accountId: accountId}});
+    if(!user) throw 'User not found';
+    return user;
 }
 
 async function getRefreshToken(token, device){
