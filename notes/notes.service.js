@@ -14,9 +14,9 @@ module.exports = {
 }
 
 async function getNotes(accountId){
-    const account = await auth.getAccountById(accountId);
-    
-    return notes = await account.getNotes({
+    const user = await auth.getUserByAccountId(accountId);
+   
+    return notes = await user.getNotes({
         where: {deleted: 0}, 
         include: [
             {
@@ -31,11 +31,11 @@ async function getNotes(accountId){
     });
 }
 
-async function createNote(note, accountId){
-    const account = await auth.getAccountById(accountId);
+async function createNote(note, accountId){    
+    const user = await auth.getUserByAccountId(accountId);
 
     var newNote = await db.Note.create(note);
-    await newNote.setAccount(account);
+    await newNote.setUser(user);
     return await getNoteByIdWithTags(newNote.id);
 }
 
@@ -47,13 +47,12 @@ async function updateNote(updNote, noteId){
 }
 
 async function deleteNote(noteId, currentAccount){
-    const note = await getNoteById(noteId);   
-    const account = await auth.getAccountById(currentAccount.id);
+    const user = await auth.getUserByAccountId(currentAccount.id);
 
-    const accountNotes = await account.getNotes({ where: {deleted: 0}});
-    account.ownsNote = note => !!accountNotes.find(n => n.id === note.id);
+    const userNotes = await user.getNotes({ where: {deleted: 0}});
+    user.ownsNote = note => !!userNotes.find(n => n.id === note.id);
 
-    if(!account.ownsNote) throw "No permissions to delete this note";
+    if(!user.ownsNote) throw "No permissions to delete this note";
     
     await db.Note.update({ 
         deleted: 1,

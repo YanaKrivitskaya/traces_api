@@ -43,11 +43,11 @@ async function initialize(){
     db.Group.belongsToMany(db.User, {through: 'user_group', as: 'users', foreignKey: 'groupId'});
     db.User.belongsToMany(db.Group, {through: 'user_group', as: 'groups', foreignKey: 'userId'});
 
-    db.Account.hasMany(db.Note, {onDelete: 'CASCADE'});
-    db.Note.belongsTo(db.Account);
+    db.User.hasMany(db.Note, {onDelete: 'CASCADE'});
+    db.Note.belongsTo(db.User);
 
-    db.Account.hasMany(db.Tag, {onDelete: 'CASCADE'});
-    db.Tag.belongsTo(db.Account);
+    db.User.hasMany(db.Tag, {onDelete: 'CASCADE'});
+    db.Tag.belongsTo(db.User);
 
     db.Note.belongsToMany(db.Tag, {through: 'note_tag', as: 'tags', foreignKey: 'noteId' });
     db.Tag.belongsToMany(db.Note, {through: 'note_tag', as: 'notes', foreignKey: 'tagId'});
