@@ -29,6 +29,8 @@ async function initialize(){
     db.Note = require('./notes/note.model')(sequelize);
     db.Tag = require('./tags/tag.model')(sequelize);
     db.NoteTag = require('./notes/note-tag.model')(sequelize);
+    db.Visa = require('./visas/visa.model')(sequelize);
+    db.VisaEntry = require('./visas/visa-entry.model')(sequelize);
 
     //relations
     db.Account.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
@@ -51,6 +53,15 @@ async function initialize(){
 
     db.Note.belongsToMany(db.Tag, {through: 'note_tag', as: 'tags', foreignKey: 'noteId' });
     db.Tag.belongsToMany(db.Note, {through: 'note_tag', as: 'notes', foreignKey: 'tagId'});
+
+    db.User.hasMany(db.Visa);
+    db.Visa.belongsTo(db.User);
+
+    db.Account.hasMany(db.Visa, {foreignKey: 'createdBy'});
+    db.Visa.belongsTo(db.Account, {foreignKey: 'createdBy'});
+
+    db.Visa.hasMany(db.VisaEntry);
+    db.VisaEntry.belongsTo(db.Visa);
 
     try {
         await sequelize.authenticate();
