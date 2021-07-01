@@ -35,8 +35,7 @@ function createVisaSchema(req, res, next) {
         visa: Joi.object({
             country: Joi.string().required(),
             type: Joi.string().required(),
-            entriesType: Joi.string().required(),
-            durationOfStay: Joi.string().required(),
+            entriesType: Joi.string().required(),            
             startDate: Joi.date().required(),
             endDate: Joi.date().required(),
         })
@@ -54,8 +53,7 @@ function updateVisaSchema(req, res, next) {
     const schema = Joi.object({
         country: Joi.string().required(),
         type: Joi.string().required(),
-        entriesType: Joi.string().required(),
-        durationOfStay: Joi.string().required(),
+        entriesType: Joi.string().required(),        
         startDate: Joi.date().required(),
         endDate: Joi.date().required(),
     });
