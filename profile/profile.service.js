@@ -8,8 +8,7 @@ module.exports = {
     getAccountUsers,
     getGroupUsers,
     updateUser,
-    removeUserFromGroup,
-    getUserByAccountId
+    removeUserFromGroup
 }
 
 async function getProfileWithGroups(accountId){
@@ -114,12 +113,6 @@ async function getGroupById(groupId){
 
 async function getUserById(userId){
     const user = await db.User.findByPk(userId);
-    if(!user) throw 'User not found';
-    return user;
-}
-
-async function getUserByAccountId(accountId){
-    const user = await db.User.findOne({where: {accountId: accountId}});
     if(!user) throw 'User not found';
     return user;
 }
