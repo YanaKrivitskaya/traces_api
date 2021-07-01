@@ -13,9 +13,9 @@ module.exports = {
     addNoteTag
 }
 
-async function getNotes(userId){
-    const user = await auth.getUserById(userId);
-    
+async function getNotes(accountId){
+    const user = await auth.getUserByAccountId(accountId);
+   
     return notes = await user.getNotes({
         where: {deleted: 0}, 
         include: [
@@ -31,8 +31,8 @@ async function getNotes(userId){
     });
 }
 
-async function createNote(note, userId){
-    const user = await auth.getUserById(userId);
+async function createNote(note, accountId){    
+    const user = await auth.getUserByAccountId(accountId);
 
     var newNote = await db.Note.create(note);
     await newNote.setUser(user);
@@ -46,14 +46,10 @@ async function updateNote(updNote, noteId){
     return await getNoteByIdWithTags(noteId);
 }
 
-async function deleteNote(noteId, currentUser){
-    const note = await getNoteById(noteId);   
-    const user = await auth.getUserById(currentUser.id);
+async function deleteNote(noteId, currentAccount){
+    const user = await auth.getUserByAccountId(currentAccount.id);
 
-    const userNotes = await user.getNotes({ where: {deleted: 0}});
-    user.ownsNote = note => !!userNotes.find(n => n.id === note.id);
-
-    if(!user.ownsNote) throw "No permissions to delete this note";
+    await userOwnsNote(user, noteId);
     
     await db.Note.update({ 
         deleted: 1,
@@ -96,4 +92,11 @@ async function getNoteByIdWithTags(noteId){
     ]});
     if(!note) throw 'Note not found';
     return note;
+}
+
+async function userOwnsNote(user, noteId){
+    const accountNotes = await account.getNotes({ where: {deleted: 0, id: noteId}});
+
+    if(accountNotes.length == 0) throw "No permissions for this note";
+    return true;
 }
