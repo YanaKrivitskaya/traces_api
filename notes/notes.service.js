@@ -49,10 +49,7 @@ async function updateNote(updNote, noteId){
 async function deleteNote(noteId, currentAccount){
     const user = await auth.getUserByAccountId(currentAccount.id);
 
-    const userNotes = await user.getNotes({ where: {deleted: 0}});
-    user.ownsNote = note => !!userNotes.find(n => n.id === note.id);
-
-    if(!user.ownsNote) throw "No permissions to delete this note";
+    await userOwnsNote(user, noteId);
     
     await db.Note.update({ 
         deleted: 1,
@@ -95,4 +92,11 @@ async function getNoteByIdWithTags(noteId){
     ]});
     if(!note) throw 'Note not found';
     return note;
+}
+
+async function userOwnsNote(user, noteId){
+    const accountNotes = await account.getNotes({ where: {deleted: 0, id: noteId}});
+
+    if(accountNotes.length == 0) throw "No permissions for this note";
+    return true;
 }

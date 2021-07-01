@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const db = require('../db');
+const { Op } = require("sequelize");
 
 module.exports = {
     createAccount, 
@@ -9,7 +10,9 @@ module.exports = {
     getAccountById,    
     refreshToken,
     revokeToken,
-    getUserByAccountId
+    getUserByAccountId,
+    getUserById,
+    accountOwnsUser
 };
 
 async function createAccount(params){
@@ -27,7 +30,7 @@ async function createAccount(params){
     var newAccount = await db.Account.create(params);
 
     //create user entity
-    var user = await newAccount.createUser({name: params.name, createdByAccountId: newAccount.id});
+    var user = await newAccount.createUser({name: params.name, createdBy: newAccount.id});
 
     //create family group
     var group = await newAccount.createGroup({name: "Family", });
@@ -124,6 +127,12 @@ async function getUserByAccountId(accountId){
     return user;
 }
 
+async function getUserById(userId){
+    const user = await db.User.findByPk(userId);
+    if(!user) throw 'User not found';
+    return user;
+}
+
 async function getRefreshToken(token, device){
     const refreshToken =  await db.RefreshToken.findOne({ where: { token: token, deviceId: device } });
     if(!refreshToken || !refreshToken.isActive) throw 'UnauthorizedError';
@@ -152,4 +161,17 @@ function generateRefreshToken(account, device){
         expirationDate: new Date(Date.now() + 7*24*60*60*1000),
         deviceId: device
     });
+}
+
+async function accountOwnsUser(account, userId){
+    const accountUsers = await db.User.findAll({where: {
+        createdBy: account.id,
+        id: userId,
+        accountId: {
+            [Op.or]: [null, account.id]
+          }
+    }});
+
+    if(accountUsers.length == 0) throw "No permissions for this user";
+    return true;
 }

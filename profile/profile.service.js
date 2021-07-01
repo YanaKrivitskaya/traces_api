@@ -45,7 +45,7 @@ async function createUserForGroup(user, groupId, accountId){
 
     if(!accountOwnsGroup) throw "No permissions to add user to this group";
 
-    user.createdByAccountId = account.id;
+    user.createdBy = account.id;
 
     const newUser = await db.User.create(user);
     await group.addUser(newUser);   
@@ -59,7 +59,7 @@ async function updateUser(userObject, userId, accountId){
 
     var user = await db.User.findByPk(userId);
     
-    var ownedUsers = await db.User.findAll({where:{createdByAccountId: account.id, accountId: null}});
+    var ownedUsers = await db.User.findAll({where:{createdBy: account.id, accountId: null}});
     if(accountUser.id != userId && ownedUsers.filter(u => u.id == userId).length == 0) throw "No permissions to update user";
 
     user.name = userObject.name;
@@ -77,7 +77,7 @@ async function removeUserFromGroup(groupId, userId, accountId){
 
     if(group.ownerAccountId != account.id) throw "No permissions to remove user from this group";
 
-    var ownedUsers = await db.User.findAll({where:{createdByAccountId: account.id, accountId: null}});
+    var ownedUsers = await db.User.findAll({where:{createdBy: account.id, accountId: null}});
     if(ownedUsers.filter(u => u.id == userId).length == 0) throw "No permissions to remove this user";
 
     await user.removeGroup(group);
@@ -92,7 +92,7 @@ async function removeUserFromGroup(groupId, userId, accountId){
 }
 
 async function getAccountUsers(accountId){    
-    return await db.Users.findAll({where: {createdByAccountId: accountId}});
+    return await db.Users.findAll({where: {createdBy: accountId}});
 }
 
 async function getGroupUsers(groupId){    

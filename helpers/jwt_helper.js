@@ -16,6 +16,7 @@ function authorize() {
             req.user = user.get();
             const refreshTokens = await user.getUser_tokens();
             req.user.ownsToken = token => !!refreshTokens.find(x => x.token === token);
+            
             next();
         }
     ]; 
