@@ -7,6 +7,8 @@ module.exports = (sequelize, type) => {
         type:{type:DataTypes.STRING(50), allowNull: false},
         entriesType:{type:DataTypes.STRING(50), allowNull: false},
         durationOfStay:{type:DataTypes.INTEGER},
+        startDate:{type:DataTypes.DATE, allowNull: false},
+        endDate:{type:DataTypes.DATE, allowNull: false},
         createdDate:{type:DataTypes.DATE, allowNull: false},
         updatedDate:{type:DataTypes.DATE},
         deleted:{type:DataTypes.BOOLEAN, defaultValue: 0},

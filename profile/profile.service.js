@@ -9,7 +9,8 @@ module.exports = {
     getGroupUsers,
     updateUser,
     removeUserFromGroup,
-    getUserByAccountId
+    getUserByAccountId,
+    getGroups
 }
 
 async function getProfileWithGroups(accountId){
@@ -94,6 +95,18 @@ async function removeUserFromGroup(groupId, userId, accountId){
 async function getAccountUsers(accountId){    
     return await db.Users.findAll({where: {createdBy: accountId}});
 }
+
+async function getGroups(accountId){    
+    return await db.Group.findAll({where: {ownerAccountId: accountId}, attributes: ["id", "name", "ownerAccountId"],                    
+    through: {attributes: []},
+    include: {
+        model: db.User,
+        as: "users",                        
+        attributes: ["id", "accountId", "name"],
+        through: {attributes: ["isOwner"]},
+      }});
+}
+
 
 async function getGroupUsers(groupId){    
     return await db.Group.findByPk(groupId, {attributes: ["id", "name", "ownerAccountId"],                    
