@@ -9,7 +9,9 @@ module.exports = router;
 
 router.get('/', authorize(), getTrips); 
 router.get('/:id', authorize(), getTripById); 
-router.post('/', authorize(), createTripSchema, createTrip);
+router.post('/', authorize(), tripSchema, createTrip);
+router.put('/:id', authorize(), tripSchema, updateTrip);
+router.delete('/:id', authorize(), deleteTrip);
 
 function getTrips(req, res, next){
     tripsService.getTrips(req.user.id)
@@ -23,13 +25,13 @@ function getTripById(req, res, next){
     .catch(next);
 }
 
-function createTripSchema(req, res, next) {
+function tripSchema(req, res, next) {
     const schema = Joi.object({
         name: Joi.string().required(),
-        description: Joi.string().optional().allow(null),      
-        coverImageUrl: Joi.string().optional().allow(null), 
+        description: Joi.string().allow(null, ''),      
+        coverImageUrl: Joi.string().allow(null, ''), 
         startDate: Joi.date().required(),
-        endDate: Joi.date().required(),
+        endDate: Joi.date().allow(null, ''),
     });
     validateRequest(req, next, schema);
 }
@@ -37,5 +39,17 @@ function createTripSchema(req, res, next) {
 function createTrip(req, res, next){
     tripsService.createTrip(req.body, req.user.id)
     .then((trip) => res.json({trip}))
+    .catch(next);
+}
+
+function updateTrip(req, res, next){
+    tripsService.updateTrip(req.body, req.user.id)
+    .then((trip) => res.json({trip}))
+    .catch(next);
+}
+
+function deleteTrip(req, res, next){
+    tripsService.deleteTrip(req.params.id, req.user.id)
+    .then((response) => res.json({response}))
     .catch(next);
 }

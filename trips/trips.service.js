@@ -4,10 +4,9 @@ const auth = require('../auth/auth.service');
 module.exports = {
     getTrips,
     getTrip,
-    createTrip
-    /*,
-    updateTrip,    
-    deleteTrip*/
+    createTrip,
+    updateTrip,
+    deleteTrip
 }
 
 async function getTrips(accountId){
@@ -65,9 +64,57 @@ async function getTrips(accountId){
     userTrip.isOwner = true;
     await userTrip.save();
  
-    const tripResponse = await getTripById(newTrip.id);
+    const tripResponse = await db.Trip.findByPk(newTrip.id, {
+        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
+        where: {deleted: 0},
+        include:[
+            {               
+                model: db.User,
+                as: "users",
+                attributes: ["id", "accountId", "name"],
+                through: {attributes: []},
+            }
+        ]
+    });
  
     return tripResponse;
+ }
+
+ async function updateTrip(updTrip, accountId){
+    const account = await auth.getAccountById(accountId);    
+
+    const trip = await getTripById(trip);
+
+    await userOwnsTrip(account, trip.id);
+
+    await trip.update(updTrip);
+ 
+    const tripResponse = await db.Trip.findByPk(newTrip.id, {
+        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
+        where: {deleted: 0},
+        include:[
+            {               
+                model: db.User,
+                as: "users",
+                attributes: ["id", "accountId", "name"],
+                through: {attributes: []},
+            }
+        ]
+    });
+ 
+    return tripResponse;
+ }
+
+ async function deleteTrip(tripId, accountId){
+    const account = await auth.getAccountById(accountId);    
+
+    const trip = await getTripById(trip);
+
+    await userOwnsTrip(account, trip.id);
+
+    await db.Trip.destroy({where:{id: tripId}});
+ 
+   return "Ok";
  }
 
  async function getTripById(tripId){
@@ -75,7 +122,6 @@ async function getTrips(accountId){
     if(!trip) throw 'Trip not found';
     return trip;
 }
-
 
  async function userOwnsTrip(account, tripId){
     const accounttrips = await account.getTrips({ where: {deleted: 0, id: tripId}});
