@@ -9,8 +9,8 @@ module.exports = router;
 
 router.get('/', authorize(), getVisas); 
 router.get('/:id', authorize(), getVisaById); 
-router.post('/', authorize(), createVisaSchema, createVisa);
-router.put('/:id', authorize(), updateVisaSchema, updateVisa);
+router.post('/', authorize(), visaSchema, createVisa);
+router.put('/:id', authorize(), visaSchema, updateVisa);
 router.post('/:id/entry', authorize(), visaEntrySchema, createVisaEntry);
 router.get('/:id/entry/:entryId', authorize(), getVisaEntry);
 router.put('/:id/entry/:entryId', authorize(), visaEntrySchema, updateVisaEntry);
@@ -29,13 +29,14 @@ function getVisaById(req, res, next){
     .catch(next);
 }
 
-function createVisaSchema(req, res, next) {
+function visaSchema(req, res, next) {
     const schema = Joi.object({        
         userId: Joi.number().required(),
         visa: Joi.object({
             country: Joi.string().required(),
             type: Joi.string().required(),
-            entriesType: Joi.string().required(),            
+            entriesType: Joi.string().required(),
+            durationOfStay: Joi.number(),
             startDate: Joi.date().required(),
             endDate: Joi.date().required(),
         })
@@ -49,19 +50,8 @@ function createVisa(req, res, next){
     .catch(next);
 }
 
-function updateVisaSchema(req, res, next) {
-    const schema = Joi.object({
-        country: Joi.string().required(),
-        type: Joi.string().required(),
-        entriesType: Joi.string().required(),        
-        startDate: Joi.date().required(),
-        endDate: Joi.date().required(),
-    });
-    validateRequest(req, next, schema);
-}
-
 function updateVisa(req, res, next){
-    visasService.updateVisa(req.body.visa, req.params.id, req.user.id)
+    visasService.updateVisa(req.body.visa, req.params.id, req.body.userId, req.user.id)
     .then((visa) => res.json({visa}))
     .catch(next);
 }
@@ -69,14 +59,21 @@ function updateVisa(req, res, next){
 function visaEntrySchema(req, res, next) {
     const schema = Joi.object({
         entryCountry: Joi.string().required(),
+        entryCity: Joi.string().allow(null, ''),
         entryTransport: Joi.string().required(),       
-        entryDate: Joi.date().required()        
+        entryDate: Joi.date().required(),
+        exitCountry: Joi.string().allow(null, ''),
+        exitCity: Joi.string().allow(null, ''),
+        exitTransport: Joi.string().allow(null, ''),       
+        exitDate: Joi.date().allow(null),
+        hasExit: Joi.boolean().allow(null),
+        visaId: Joi.number().required()
     });
     validateRequest(req, next, schema);
 }
 
 function createVisaEntry(req, res, next){
-    visasService.createVisaEntry(req.params.id, req.body.visaEntry, req.user.id)
+    visasService.createVisaEntry(req.params.id, req.body, req.user.id)
     .then((entry) => res.json({entry}))
     .catch(next);
 }
@@ -88,7 +85,7 @@ function getVisaEntry(req, res, next){
 }
 
 function updateVisaEntry(req, res, next){
-    visasService.updateVisaEntry(req.params.entryId, req.body.visaEntry, req.user.id)
+    visasService.updateVisaEntry(req.params.entryId, req.body, req.user.id)
     .then((entry) => res.json({entry}))
     .catch(next);
 }

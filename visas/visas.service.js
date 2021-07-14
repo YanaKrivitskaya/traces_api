@@ -17,7 +17,7 @@ async function getVisas(accountId){
    const account = await auth.getAccountById(accountId);
 
    const visasResponse = await account.getVisas({
-       attributes: ["id", "country", "type", "entriesType", "durationOfStay", "createdBy"], 
+       attributes: ["id", "country", "type", "entriesType", "durationOfStay", "createdBy", "startDate", "endDate"], 
        where: {deleted: 0},
        include:[
            {
@@ -37,7 +37,7 @@ async function getVisaByIdWithEntries(visaId, accountId){
     await userOwnsVisa(account, visaId);
  
     const visaResponse = await db.Visa.findByPk(visaId, {
-        attributes: ["id", "country", "type", "entriesType", "durationOfStay", "createdBy"], 
+        attributes: ["id", "country", "type", "entriesType", "durationOfStay", "createdBy", "startDate", "endDate"], 
         where: {deleted: 0},
         include:[
             {
@@ -48,6 +48,7 @@ async function getVisaByIdWithEntries(visaId, accountId){
              model: db.VisaEntry,            
              attributes: [
                  "id", 
+                 "visaId",
                  "entryCountry", 
                  "entryCity",
                  "entryTransport",
@@ -75,6 +76,7 @@ async function getVisaByIdWithEntries(visaId, accountId){
     const entryResponse = await db.VisaEntry.findByPk(entryId, {
         attributes: [
             "id", 
+            "visaId",
             "entryCountry", 
             "entryCity",
             "entryTransport",
@@ -96,7 +98,7 @@ async function createVisa(visa, userId, accountId){
     const account = await auth.getAccountById(accountId);
     const user = await auth.getUserById(userId);
 
-    await auth.accountOwnsUser(account, user.id);
+    //await auth.accountOwnsUser(account, user.id);
  
     const newVisa = await db.Visa.create(visa);    
 
@@ -104,7 +106,7 @@ async function createVisa(visa, userId, accountId){
     await newVisa.setUser(user);
  
     const visaResponse = await db.Visa.findByPk(newVisa.id, {
-        attributes: ["id", "country", "type", "entriesType", "durationOfStay", "createdBy"],
+        attributes: ["id", "country", "type", "entriesType", "durationOfStay", "createdBy", "startDate", "endDate"],
         include:[
             {
                 model: db.User,
@@ -115,16 +117,18 @@ async function createVisa(visa, userId, accountId){
     return visaResponse;
  }
 
- async function updateVisa(updVisa, visaId, accountId){
+ async function updateVisa(updVisa, visaId, userId, accountId){
     const account = await auth.getAccountById(accountId);
+    const user = await auth.getUserById(userId);
     const visa = await getVisaById(visaId);
 
-    await userOwnsVisa(account, visaId);
+    //await userOwnsVisa(account, visaId);
  
-    await visa.update(updVisa);   
+    await visa.update(updVisa);
+    await visa.setUser(user);
  
     const visaResponse = await db.Visa.findByPk(visaId, {
-        attributes: ["id", "country", "type", "entriesType", "durationOfStay", "createdBy"], 
+        attributes: ["id", "country", "type", "entriesType", "durationOfStay", "createdBy", "startDate", "endDate"], 
         where: {deleted: 0},
         include:[
             {
@@ -135,6 +139,7 @@ async function createVisa(visa, userId, accountId){
              model: db.VisaEntry,            
              attributes: [
                  "id", 
+                 "visaId",
                  "entryCountry", 
                  "entryCity",
                  "entryTransport",
@@ -157,8 +162,16 @@ async function createVisa(visa, userId, accountId){
     const visa = await getVisaById(visaId);
 
     await userOwnsVisa(account, visaId);
- 
-    await db.Visa.destroy(visa);
+
+    const visaEntries = visa.getVisa_entries();
+
+    if(visaEntries.length > 0){
+        for (const entry of visaEntries) {
+            await db.VisaEntry.destroy({where:{id: entry.id}});
+        }
+    }    
+
+    await db.Visa.destroy({where:{id: visaId}});
     
     return "Ok";
  }
@@ -171,7 +184,7 @@ async function createVisa(visa, userId, accountId){
 
     await userOwnsVisa(account, visa.id);
  
-    await db.VisaEntry.destroy(entry);
+    await db.VisaEntry.destroy({where:{id: entryId}});
     
     return "Ok";
  }
@@ -189,6 +202,7 @@ async function createVisa(visa, userId, accountId){
     const entryResponse = await db.VisaEntry.findByPk(newEntry.id, {
         attributes: [
             "id", 
+            "visaId",
             "entryCountry", 
             "entryCity",
             "entryTransport",
@@ -216,6 +230,7 @@ async function createVisa(visa, userId, accountId){
     const entryResponse = await db.VisaEntry.findByPk(entry.id, {
         attributes: [
             "id", 
+            "visaId",
             "entryCountry", 
             "entryCity",
             "entryTransport",
