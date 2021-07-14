@@ -20,6 +20,7 @@ app.use('/notes', require('./notes/notes.controller'));
 app.use('/tags', require('./tags/tags.controller'));
 app.use('/profile', require('./profile/profile.controller'));
 app.use('/visas', require('./visas/visas.controller'));
+app.use('/trips', require('./trips/trips.controller'));
 
 app.use(errorHandler);
 

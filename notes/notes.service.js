@@ -95,7 +95,7 @@ async function getNoteByIdWithTags(noteId){
 }
 
 async function userOwnsNote(user, noteId){
-    const accountNotes = await account.getNotes({ where: {deleted: 0, id: noteId}});
+    const accountNotes = await user.getNotes({ where: {deleted: 0, id: noteId}});
 
     if(accountNotes.length == 0) throw "No permissions for this note";
     return true;

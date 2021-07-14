@@ -8,6 +8,7 @@ const validateRequest = require('../helpers/validate_request');
 module.exports = router;
 
 router.get('/', authorize(), getProfileWithGroups);
+router.get('/groups', authorize(), getGroups);
 router.get('/groups/:id/users', authorize(), getGroupUsers);
 router.post('/groups/:id/users', authorize(), createUserSchema, createUserForGroup);
 router.delete('/groups/:id/users/:userId', authorize(), removeUserFromGroup);
@@ -49,6 +50,12 @@ function updateUser(req, res, next){
 function getGroupUsers(req, res, next){
     profileService.getGroupUsers(req.params.id, req.user.id)
     .then((group) => res.json({group}))
+    .catch(next);
+}
+
+function getGroups(req, res, next){
+    profileService.getGroups(req.user.id)
+    .then((groups) => res.json({groups}))
     .catch(next);
 }
 
