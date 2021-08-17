@@ -11,6 +11,7 @@ router.get('/', authorize(), getTrips);
 router.get('/:id', authorize(), getTripById); 
 router.post('/', authorize(), tripSchema, createTrip);
 router.put('/:id', authorize(), tripSchema, updateTrip);
+router.put('/:id/users', authorize(), tripUserSchema, updateTripUsers);
 router.delete('/:id', authorize(), deleteTrip);
 
 function getTrips(req, res, next){
@@ -31,7 +32,7 @@ function tripSchema(req, res, next) {
         description: Joi.string().allow(null, ''),      
         coverImageUrl: Joi.string().allow(null, ''), 
         startDate: Joi.date().required(),
-        endDate: Joi.date().allow(null, ''),
+        endDate: Joi.date().allow(null, '')           
     });
     validateRequest(req, next, schema);
 }
@@ -44,6 +45,19 @@ function createTrip(req, res, next){
 
 function updateTrip(req, res, next){
     tripsService.updateTrip(req.body, req.user.id)
+    .then((trip) => res.json({trip}))
+    .catch(next);
+}
+
+function tripUserSchema(req, res, next) {
+    const schema = Joi.object({
+        userIds: Joi.array().required()         
+    });
+    validateRequest(req, next, schema);
+}
+
+function updateTripUsers(req, res, next){
+    tripsService.updateTripUsers(req.params.id, req.user.id, req.body.userIds)
     .then((trip) => res.json({trip}))
     .catch(next);
 }

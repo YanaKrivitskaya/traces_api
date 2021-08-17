@@ -6,7 +6,8 @@ module.exports = {
     getTrip,
     createTrip,
     updateTrip,
-    deleteTrip
+    deleteTrip,
+    updateTripUsers
 }
 
 async function getTrips(accountId){
@@ -83,7 +84,7 @@ async function getTrips(accountId){
  async function updateTrip(updTrip, accountId){
     const account = await auth.getAccountById(accountId);    
 
-    const trip = await getTripById(trip);
+    const trip = await getTripById(updTrip.id);
 
     await userOwnsTrip(account, trip.id);
 
@@ -105,12 +106,57 @@ async function getTrips(accountId){
     return tripResponse;
  }
 
+ async function updateTripUsers(tripId, accountId, userIds){
+    const account = await auth.getAccountById(accountId);    
+
+    const trip = await getTripById(tripId);
+
+    await userOwnsTrip(account, trip.id);
+
+    const tripUsers = await trip.getUsers();
+    for (const tripUser of tripUsers){
+        if(!userIds.includes(tripUser.id)){
+            await trip.removeUser(tripUser);
+        }
+    }
+
+    for (const userId of userIds) {
+        var user = await auth.getUserById(userId);      
+
+        const userTrip = await user.getTrips({ where: {deleted: 0, id: tripId}});
+
+        if(userTrip.length == 0){
+            await trip.addUser(user);
+        }
+    }
+
+    const tripResponse = await db.Trip.findByPk(tripId, {
+        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
+        where: {deleted: 0},
+        include:[
+            {               
+                model: db.User,
+                as: "users",
+                attributes: ["id", "accountId", "name"],
+                through: {attributes: []},
+            }
+        ]
+    });
+ 
+    return tripResponse;
+ }
+
  async function deleteTrip(tripId, accountId){
     const account = await auth.getAccountById(accountId);    
 
-    const trip = await getTripById(trip);
+    const trip = await getTripById(tripId);
 
     await userOwnsTrip(account, trip.id);
+
+    const tripUsers = await trip.getUsers();
+    for (const tripUser of tripUsers){
+        await trip.removeUser(tripUser);
+    }    
 
     await db.Trip.destroy({where:{id: tripId}});
  
