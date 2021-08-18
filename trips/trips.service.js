@@ -7,7 +7,10 @@ module.exports = {
     createTrip,
     updateTrip,
     deleteTrip,
-    updateTripUsers
+    updateTripUsers,
+    getTripById,
+    userOwnsTrip,
+    getTripByIdWithDetails
 }
 
 async function getTrips(accountId){
@@ -22,6 +25,17 @@ async function getTrips(accountId){
                 as: "users",
                 attributes: ["id", "accountId", "name"],
                 through: {attributes: []},
+            },
+            {
+                model: db.TripDay,                
+                attributes: [
+                    "id", 
+                    "date",
+                    "name", 
+                    "description",
+                    "dayNumber",
+                    "image"
+                ],
             }
         ]
     });
@@ -36,18 +50,7 @@ async function getTrips(accountId){
 
     await userOwnsTrip(account, tripId);
  
-    const tripResponse = await db.Trip.findByPk(tripId, {
-        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
-        where: {deleted: 0},
-        include:[
-            {               
-                model: db.User,
-                as: "users",
-                attributes: ["id", "accountId", "name"],
-                through: {attributes: []},
-            }
-        ]
-    });
+    const tripResponse = await getTripByIdWithDetails(tripId);
  
     return tripResponse;
  }
@@ -65,18 +68,7 @@ async function getTrips(accountId){
     userTrip.isOwner = true;
     await userTrip.save();
  
-    const tripResponse = await db.Trip.findByPk(newTrip.id, {
-        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
-        where: {deleted: 0},
-        include:[
-            {               
-                model: db.User,
-                as: "users",
-                attributes: ["id", "accountId", "name"],
-                through: {attributes: []},
-            }
-        ]
-    });
+    const tripResponse = await getTripByIdWithDetails(newTrip.id);
  
     return tripResponse;
  }
@@ -90,18 +82,7 @@ async function getTrips(accountId){
 
     await trip.update(updTrip);
  
-    const tripResponse = await db.Trip.findByPk(newTrip.id, {
-        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
-        where: {deleted: 0},
-        include:[
-            {               
-                model: db.User,
-                as: "users",
-                attributes: ["id", "accountId", "name"],
-                through: {attributes: []},
-            }
-        ]
-    });
+    const tripResponse = await getTripByIdWithDetails(tripId);
  
     return tripResponse;
  }
@@ -130,18 +111,7 @@ async function getTrips(accountId){
         }
     }
 
-    const tripResponse = await db.Trip.findByPk(tripId, {
-        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
-        where: {deleted: 0},
-        include:[
-            {               
-                model: db.User,
-                as: "users",
-                attributes: ["id", "accountId", "name"],
-                through: {attributes: []},
-            }
-        ]
-    });
+    const tripResponse = await getTripByIdWithDetails(tripId);
  
     return tripResponse;
  }
@@ -156,7 +126,12 @@ async function getTrips(accountId){
     const tripUsers = await trip.getUsers();
     for (const tripUser of tripUsers){
         await trip.removeUser(tripUser);
-    }    
+    }
+    
+    const tripDays = await trip.getTrip_days();
+    for (const day of tripDays){
+        await db.TripDay.destroy({where:{id: day.id}});
+    }
 
     await db.Trip.destroy({where:{id: tripId}});
  
@@ -167,6 +142,33 @@ async function getTrips(accountId){
     const trip = await db.Trip.findByPk(tripId);
     if(!trip) throw 'Trip not found';
     return trip;
+}
+
+async function getTripByIdWithDetails(tripId){
+    const tripResponse = await db.Trip.findByPk(tripId, {
+        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
+        where: {deleted: 0},
+        include:[
+            {               
+                model: db.User,
+                as: "users",
+                attributes: ["id", "accountId", "name"],
+                through: {attributes: []},
+            },
+            {
+                model: db.TripDay,               
+                attributes: [
+                    "id", 
+                    "date",
+                    "name", 
+                    "description",
+                    "dayNumber",
+                    "image"
+                ],
+            }
+        ]
+    });
+    return tripResponse;
 }
 
  async function userOwnsTrip(account, tripId){
