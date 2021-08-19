@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const tripsService = require('./trips.service');
-const tripDayService = require('./trip-day/trip-day.service');
 const authorize = require('../helpers/jwt_helper');
 const Joi = require('joi');
 const validateRequest = require('../helpers/validate_request');
@@ -14,8 +13,6 @@ router.post('/', authorize(), tripSchema, createTrip);
 router.put('/:id', authorize(), tripSchema, updateTrip);
 router.put('/:id/users', authorize(), tripUserSchema, updateTripUsers);
 router.delete('/:id', authorize(), deleteTrip);
-
-router.post('/:id/days', authorize(), tripDaySchema, createTripDay);
 
 function getTrips(req, res, next){
     tripsService.getTrips(req.user.id)
@@ -68,22 +65,5 @@ function updateTripUsers(req, res, next){
 function deleteTrip(req, res, next){
     tripsService.deleteTrip(req.params.id, req.user.id)
     .then((response) => res.json({response}))
-    .catch(next);
-}
-
-function tripDaySchema(req, res, next) {
-    const schema = Joi.object({
-        name: Joi.string().required(),
-        description: Joi.string().allow(null, ''),      
-        image: Joi.string().allow(null, ''), 
-        date: Joi.date().required(),
-        dayNumber: Joi.number().allow(null, '')
-    });
-    validateRequest(req, next, schema);
-}
-
-function createTripDay(req, res, next){
-    tripDayService.createTripDay(req.body, req.params.id, req.user.id)
-    .then((trip) => res.json({trip}))
     .catch(next);
 }
