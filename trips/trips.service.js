@@ -25,17 +25,6 @@ async function getTrips(accountId){
                 as: "users",
                 attributes: ["id", "accountId", "name"],
                 through: {attributes: []},
-            },
-            {
-                model: db.TripDay,                
-                attributes: [
-                    "id", 
-                    "date",
-                    "name", 
-                    "description",
-                    "dayNumber",
-                    "image"
-                ],
             }
         ]
     });
@@ -127,11 +116,6 @@ async function getTrips(accountId){
     for (const tripUser of tripUsers){
         await trip.removeUser(tripUser);
     }
-    
-    const tripDays = await trip.getTrip_days();
-    for (const day of tripDays){
-        await db.TripDay.destroy({where:{id: day.id}});
-    }
 
     await db.Trip.destroy({where:{id: tripId}});
  
@@ -154,17 +138,6 @@ async function getTripByIdWithDetails(tripId){
                 as: "users",
                 attributes: ["id", "accountId", "name"],
                 through: {attributes: []},
-            },
-            {
-                model: db.TripDay,               
-                attributes: [
-                    "id", 
-                    "date",
-                    "name", 
-                    "description",
-                    "dayNumber",
-                    "image"
-                ],
             }
         ]
     });

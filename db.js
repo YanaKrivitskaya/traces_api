@@ -33,7 +33,6 @@ async function initialize(){
     db.VisaEntry = require('./visas/visa-entry.model')(sequelize);
     db.Trip = require('./trips/trip.model')(sequelize);
     db.UserTrip = require('./trips/user-trip.model')(sequelize);
-    db.TripDay = require('./trips/trip-day/trip-day.model')(sequelize);
 
     //relations
     db.Account.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
@@ -71,9 +70,6 @@ async function initialize(){
 
     db.Trip.belongsToMany(db.User, {through: 'user_trip', as: 'users', foreignKey: 'tripId'});
     db.User.belongsToMany(db.Trip, {through: 'user_trip', as: 'trips', foreignKey: 'userId'});
-
-    db.Trip.hasMany(db.TripDay, {foreignKey: 'tripId'});
-    db.TripDay.belongsTo(db.Trip, {foreignKey: 'tripId'});
 
     try {
         await sequelize.authenticate();
