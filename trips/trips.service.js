@@ -158,6 +158,7 @@ async function getTripByIdWithDetails(tripId){
                 model: db.Booking,
                 attributes: [
                     "id", 
+                    "expenseId",
                     "name", 
                     "details", 
                     "description",         
@@ -176,6 +177,7 @@ async function getTripByIdWithDetails(tripId){
                 model: db.Ticket,
                 attributes: [
                     "id", 
+                    "expenseId",
                     "departureLocation", 
                     "arrivalLocation", 
                     "type", 
@@ -196,6 +198,7 @@ async function getTripByIdWithDetails(tripId){
                 model: db.Activity,
                 attributes: [
                     "id", 
+                    "expenseId",
                     "name",         
                     "description",         
                     "date",
