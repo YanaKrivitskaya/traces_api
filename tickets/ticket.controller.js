@@ -14,7 +14,7 @@ router.put('/:id', authorize(), updateTicketSchema, updateTicket);
 router.delete('/:id', authorize(), deleteTicket);
 
 function getTripTickets(req, res, next){
-    ticketsService.getTripTickets(req.user.id, req.body.tripId)
+    ticketsService.getTripTickets(req.user.id, req.s.tripId)
     .then((tickets) => res.json({tickets}))
     .catch(next);
 }

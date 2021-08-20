@@ -14,7 +14,7 @@ router.put('/:id', authorize(), updateExpenseSchema, updateExpense);
 router.delete('/:id', authorize(), deleteExpense);
 
 function getTripExpenses(req, res, next){
-    expensesService.getTripExpenses(req.user.id, req.body.tripId)
+    expensesService.getTripExpenses(req.user.id, req.query.tripId)
     .then((expenses) => res.json({expenses}))
     .catch(next);
 }

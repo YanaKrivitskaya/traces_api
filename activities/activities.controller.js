@@ -14,7 +14,7 @@ router.put('/:id', authorize(), updateActivitySchema, updateActivity);
 router.delete('/:id', authorize(), deleteActivity);
 
 function getTripActivities(req, res, next){
-    activitiesService.getTripActivities(req.user.id, req.body.tripId)
+    activitiesService.getTripActivities(req.user.id, req.query.tripId)
     .then((activities) => res.json({activities}))
     .catch(next);
 }
