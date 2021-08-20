@@ -150,6 +150,7 @@ async function getTripActivitiesResponse(tripId){
                  "category", 
                  "amount", 
                  "currency",
+                 "isPaid",
                  "createdDate",
                  "updatedDate"
              ],

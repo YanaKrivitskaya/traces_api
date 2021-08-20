@@ -95,6 +95,7 @@ async function getExpenseByIdResponse(id){
             "category", 
             "amount", 
             "currency",
+            "isPaid",
             "createdDate",
             "updatedDate"],           
         });
@@ -112,6 +113,7 @@ async function getTripExpensesResponse(tripId){
         "category", 
         "amount", 
         "currency",
+        "isPaid",
         "createdDate",
         "updatedDate"], 
         where: {tripId: tripId}

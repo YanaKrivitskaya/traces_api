@@ -130,6 +130,7 @@ async function getTicketByIdResponse(id){
              "category", 
              "amount", 
              "currency",
+             "isPaid",
              "createdDate",
              "updatedDate"
          ],

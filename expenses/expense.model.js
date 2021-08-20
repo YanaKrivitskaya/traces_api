@@ -9,6 +9,7 @@ module.exports = (sequelize, type) => {
         description:{type:DataTypes.TEXT},
         amount:{type:DataTypes.DECIMAL, allowNull: false},
         currency:{type:DataTypes.STRING(3)},
+        isPaid:{type:DataTypes.BOOLEAN},
         createdDate:{type:DataTypes.DATE},
         updatedDate:{type:DataTypes.DATE}
     },{

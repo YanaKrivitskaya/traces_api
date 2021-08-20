@@ -158,6 +158,7 @@ async function getTripBookingsResponse(tripId){
                  "category", 
                  "amount", 
                  "currency",
+                 "isPaid",
                  "createdDate",
                  "updatedDate"
              ],
