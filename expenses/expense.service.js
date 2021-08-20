@@ -44,7 +44,7 @@ async function createExpense(expense, tripId, accountId){
 
     await newExpense.setTrip(trip);    
  
-    const expenseResponse = await getTripExpensesResponse(tripId);
+    const expenseResponse = await getExpenseByIdResponse(newExpense.id);
  
     return expenseResponse;
  }
@@ -85,9 +85,35 @@ async function createExpense(expense, tripId, accountId){
     return expense;
 }
 
+async function getExpenseByIdResponse(id){
+    const expenseResponse = await db.Expense.findByPk(id,
+        {   attributes: [
+            "id", 
+            "name", 
+            "date", 
+            "description", 
+            "category", 
+            "amount", 
+            "currency",
+            "createdDate",
+            "updatedDate"],           
+        });
+     
+        return expenseResponse;
+}
+
 async function getTripExpensesResponse(tripId){
     const expenseResponse = await db.Expense.findAll(
-    {   attributes: ["id", "name", "date", "description", "category", "amount", "currency"], 
+    {   attributes: [
+        "id", 
+        "name", 
+        "date", 
+        "description", 
+        "category", 
+        "amount", 
+        "currency",
+        "createdDate",
+        "updatedDate"], 
         where: {tripId: tripId}
     });
  
