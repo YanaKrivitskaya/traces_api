@@ -151,9 +151,7 @@ async function getTripByIdWithDetails(tripId){
                     "currency",
                     "createdDate",
                     "updatedDate"
-                ],
-                /*as: "expenses",               
-                through: {attributes: []},*/
+                ]
             },
             {
                 model: db.Booking,
@@ -171,9 +169,7 @@ async function getTripByIdWithDetails(tripId){
                     "image",
                     "createdDate",
                     "updatedDate"
-                ],
-                /*as: "bookings",               
-                through: {attributes: []},*/
+                ]                
             },
             {
                 model: db.Ticket,
@@ -193,9 +189,21 @@ async function getTripByIdWithDetails(tripId){
                     "reservationUrl",
                     "createdDate",
                     "updatedDate"
-                ],
-                /*as: "tickets",               
-                through: {attributes: []},*/
+                ]                
+            },
+            {
+                model: db.Activity,
+                attributes: [
+                    "id", 
+                    "name",         
+                    "description",         
+                    "date",
+                    "image",        
+                    "isPlanned",
+                    "isCompleted",        
+                    "createdDate",
+                    "updatedDate"
+                ]
             }
         ]
     });
