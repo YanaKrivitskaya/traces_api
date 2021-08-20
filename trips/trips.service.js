@@ -138,6 +138,64 @@ async function getTripByIdWithDetails(tripId){
                 as: "users",
                 attributes: ["id", "accountId", "name"],
                 through: {attributes: []},
+            },
+            {               
+                model: db.Expense,            
+                attributes: [
+                    "id", 
+                    "name", 
+                    "date", 
+                    "description", 
+                    "category", 
+                    "amount", 
+                    "currency",
+                    "createdDate",
+                    "updatedDate"
+                ],
+                /*as: "expenses",               
+                through: {attributes: []},*/
+            },
+            {
+                model: db.Booking,
+                attributes: [
+                    "id", 
+                    "name", 
+                    "details", 
+                    "description",         
+                    "reservationDate",
+                    "reservationNumber",
+                    "reservationUrl",
+                    "entryDate",
+                    "exitdate",
+                    "guestsQuantity",
+                    "image",
+                    "createdDate",
+                    "updatedDate"
+                ],
+                /*as: "bookings",               
+                through: {attributes: []},*/
+            },
+            {
+                model: db.Ticket,
+                attributes: [
+                    "id", 
+                    "departureLocation", 
+                    "arrivalLocation", 
+                    "type", 
+                    "departureDatetime", 
+                    "arrivalDatetime", 
+                    "carrier", 
+                    "carrierNumber", 
+                    "quantity",
+                    "seats",
+                    "reservationDate",
+                    "reservationNumber",
+                    "reservationUrl",
+                    "createdDate",
+                    "updatedDate"
+                ],
+                /*as: "tickets",               
+                through: {attributes: []},*/
             }
         ]
     });
