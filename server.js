@@ -23,6 +23,7 @@ app.use('/visas', require('./visas/visas.controller'));
 app.use('/trips', require('./trips/trips.controller'));
 app.use('/expenses', require('./expenses/expense.controller'));
 app.use('/tickets', require('./tickets/ticket.controller'));
+app.use('/bookings', require('./bookings/bookings.controller'));
 
 app.use(errorHandler);
 

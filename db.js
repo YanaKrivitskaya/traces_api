@@ -35,6 +35,7 @@ async function initialize(){
     db.UserTrip = require('./trips/user-trip.model')(sequelize);
     db.Expense = require('./expenses/expense.model')(sequelize);
     db.Ticket = require('./tickets/ticket.model')(sequelize);
+    db.Booking = require('./bookings/booking.model')(sequelize);
 
     //relations
     db.Account.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
@@ -84,6 +85,12 @@ async function initialize(){
 
     db.Expense.hasOne(db.Ticket);
     db.Ticket.belongsTo(db.Expense);
+
+    db.Trip.hasMany(db.Booking);
+    db.Booking.belongsTo(db.Trip);
+
+    db.Expense.hasOne(db.Booking);
+    db.Booking.belongsTo(db.Expense);
 
     try {
         await sequelize.authenticate();
