@@ -166,7 +166,7 @@ async function getTripByIdWithDetails(tripId){
                     "reservationNumber",
                     "reservationUrl",
                     "entryDate",
-                    "exitdate",
+                    "exitDate",
                     "guestsQuantity",
                     "image",
                     "createdDate",
