@@ -187,7 +187,7 @@ async function getTripByIdWithDetails(tripId){
                     "carrierNumber", 
                     "quantity",
                     "seats",
-                    "reservationDate",
+                    "details",
                     "reservationNumber",
                     "reservationUrl",
                     "createdDate",
