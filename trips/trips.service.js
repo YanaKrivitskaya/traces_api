@@ -160,6 +160,7 @@ async function getTripByIdWithDetails(tripId){
                     "id", 
                     "expenseId",
                     "name", 
+                    "location",
                     "details",
                     "reservationNumber",
                     "reservationUrl",

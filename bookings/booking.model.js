@@ -4,6 +4,7 @@ module.exports = (sequelize, type) => {
     return sequelize.define('booking', {
         id:{type: DataTypes.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true},        
         name:{type:DataTypes.STRING(100), allowNull: false},
+        location :{type:DataTypes.STRING(200)},
         details:{type:DataTypes.TEXT},        
         entryDate:{type:DataTypes.DATE},
         exitDate:{type:DataTypes.DATE},       
