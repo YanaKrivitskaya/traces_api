@@ -39,8 +39,7 @@ function createBookingSchema(req, res, next) {
         booking: Joi.object({
             name: Joi.string().required(),
             details: Joi.string().allow(null, ''),
-            description: Joi.string().allow(null, ''),
-            reservationDate: Joi.date().allow(null, ''),
+            location: Joi.string().allow(null, ''),            
             reservationNumber: Joi.string().allow(null, ''),
             reservationUrl: Joi.string().allow(null, ''),
             entryDate: Joi.date().allow(null, ''),
