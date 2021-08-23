@@ -96,9 +96,7 @@ async function getBookingByIdResponse(id){
         attributes: [
         "id", 
         "name", 
-        "details", 
-        "description",         
-        "reservationDate",
+        "details",        
         "reservationNumber",
         "reservationUrl",
         "entryDate",
@@ -134,9 +132,7 @@ async function getTripBookingsResponse(tripId){
         {   attributes: [
             "id", 
             "name", 
-            "details", 
-            "description",         
-            "reservationDate",
+            "details",
             "reservationNumber",
             "reservationUrl",
             "entryDate",
