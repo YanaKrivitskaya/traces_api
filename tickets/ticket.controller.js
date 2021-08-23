@@ -47,7 +47,7 @@ function createTicketSchema(req, res, next) {
             carrierNumber: Joi.string().allow(null, ''),
             quantity: Joi.number().allow(null, ''),
             seats: Joi.string().allow(null, ''),
-            reservationDate: Joi.date().allow(null, ''),
+            details: Joi.string().allow(null, ''),
             reservationNumber: Joi.string().allow(null, ''),
             reservationUrl: Joi.string().allow(null, ''),
         })
@@ -72,7 +72,7 @@ function updateTicketSchema(req, res, next) {
         carrierNumber: Joi.string().allow(null, ''),
         quantity: Joi.number().allow(null, ''),
         seats: Joi.string().allow(null, ''),
-        reservationDate: Joi.date().allow(null, ''),
+        details: Joi.string().allow(null, ''),
         reservationNumber: Joi.string().allow(null, ''),
         reservationUrl: Joi.string().allow(null, ''),
     });

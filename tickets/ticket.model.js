@@ -12,7 +12,7 @@ module.exports = (sequelize, type) => {
         carrierNumber:{type:DataTypes.STRING(50)},
         quantity:{type:DataTypes.INTEGER},
         seats:{type:DataTypes.STRING(200)},
-        reservationDate:{type:DataTypes.DATE},
+        details:{type:DataTypes.TExt},
         reservationNumber:{type:DataTypes.STRING(100)},
         reservationUrl:{type:DataTypes.STRING(200)},
         createdDate:{type:DataTypes.DATE},
