@@ -34,7 +34,8 @@ function createExpenseSchema(req, res, next) {
             category: Joi.string().allow(null, ''),
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
-            currency: Joi.string().allow(null, ''),
+            currency: Joi.string(),
+            isPaid: Joi.boolean(),
         })
     });
     validateRequest(req, next, schema);
