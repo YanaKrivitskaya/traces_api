@@ -14,7 +14,7 @@ router.put('/:id', authorize(), updateExpenseSchema, updateExpense);
 router.delete('/:id', authorize(), deleteExpense);
 
 function getTripExpenses(req, res, next){
-    expensesService.getTripExpenses(req.user.id, req.query.tripId)
+    expensesService.getTripExpenses(req.user.id, req.body.tripId)
     .then((expenses) => res.json({expenses}))
     .catch(next);
 }
@@ -28,10 +28,10 @@ function getExpense(req, res, next){
 function createExpenseSchema(req, res, next) {
     const schema = Joi.object({        
         tripId: Joi.number().required(),
+        categoryId: Joi.number(),
         expense: Joi.object({
             date: Joi.date().required(),
-            name: Joi.string().allow(null, ''),
-            category: Joi.string().allow(null, ''),
+            name: Joi.string().allow(null, ''),            
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
             currency: Joi.string(),
@@ -42,25 +42,27 @@ function createExpenseSchema(req, res, next) {
 }
 
 function createExpense(req, res, next){
-    expensesService.createExpense(req.body.expense, req.body.tripId, req.user.id)
+    expensesService.createExpense(req.body.expense, req.body.tripId, req.body.categoryId, req.user.id)
     .then((expenses) => res.json({expenses}))
     .catch(next);
 }
 
 function updateExpenseSchema(req, res, next) {
     const schema = Joi.object({
-        date: Joi.date().required(),
-        name: Joi.string().allow(null, ''),
-        category: Joi.string().allow(null, ''),
-        description: Joi.string().allow(null, ''),
-        amount: Joi.number().required(),
-        currency: Joi.string().allow(null, ''),
+        categoryId: Joi.number().allow(null, ''),
+        expense: Joi.object({
+            date: Joi.date().required(),
+            name: Joi.string().allow(null, ''),        
+            description: Joi.string().allow(null, ''),
+            amount: Joi.number().required(),
+            currency: Joi.string().allow(null, ''),
+        })        
     });
     validateRequest(req, next, schema);
 }
 
 function updateExpense(req, res, next){
-    expensesService.updateExpense(req.body, req.user.id)
+    expensesService.updateExpense(req.body.expense, req.body.categoryId, req.user.id)
     .then((expenses) => res.json({expenses}))
     .catch(next);
 }

@@ -33,23 +33,26 @@ async function getTripExpenses(accountId, tripId){
     return expenseResponse;
  }
 
-async function createExpense(expense, tripId, accountId){
+async function createExpense(expense, tripId, categoryId, accountId){
     const account = await auth.getAccountById(accountId);
 
     await tripsService.userOwnsTrip(account, tripId);
+
+    const expenseCategory = await getExpenseCategoryById(categoryId);
 
     const newExpense = await db.Expense.create(expense);
 
     const trip = await tripsService.getTripById(tripId);
 
-    await newExpense.setTrip(trip);    
+    await newExpense.setTrip(trip);
+    await newExpense.setCategory(expenseCategory);
  
     const expenseResponse = await getExpenseByIdResponse(newExpense.id);
  
     return expenseResponse;
  }
 
- async function updateExpense(updExpense, accountId){
+ async function updateExpense(updExpense, categoryId, accountId){
     const account = await auth.getAccountById(accountId);    
 
     const expense = await getExpenseById(updExpense.id);
@@ -57,6 +60,11 @@ async function createExpense(expense, tripId, accountId){
     const trip = expense.getTrip();
 
     await userOwnsTrip(account, trip.id);
+
+    if(categoryId != null){
+        const expenseCategory = await getExpenseCategroyById(categoryId);
+        await expense.setCategory(expenseCategory);
+    }
 
     await expense.update(updExpense);
  
@@ -85,19 +93,30 @@ async function createExpense(expense, tripId, accountId){
     return expense;
 }
 
+async function getExpenseCategoryById(id){
+    const expenseCategory = await db.ExpenseCategory.findByPk(id);
+    if(!expenseCategory) throw 'Expense category not found';
+    return expenseCategory;
+}
+
 async function getExpenseByIdResponse(id){
     const expenseResponse = await db.Expense.findByPk(id,
         {   attributes: [
             "id", 
-            "name", 
             "date", 
-            "description", 
-            "category", 
+            "description",
             "amount", 
             "currency",
             "isPaid",
             "createdDate",
-            "updatedDate"],           
+            "updatedDate"],
+            include: [
+                {
+                    model: db.ExpenseCategory,
+                    as: "category",
+                    attributes: ["id", "name"]
+                }
+            ],
         });
      
         return expenseResponse;
@@ -106,17 +125,20 @@ async function getExpenseByIdResponse(id){
 async function getTripExpensesResponse(tripId){
     const expenseResponse = await db.Expense.findAll(
     {   attributes: [
-        "id", 
-        "name", 
+        "id",        
         "date", 
-        "description", 
-        "category", 
+        "description",       
         "amount", 
         "currency",
         "isPaid",
         "createdDate",
-        "updatedDate"], 
-        where: {tripId: tripId}
+        "updatedDate"],        
+        where: {tripId: tripId},
+        include: [{
+            model: db.ExpenseCategory,
+                as: "category",
+                attributes: ["id", "name"]                
+        }]
     });
  
     return expenseResponse;

@@ -37,6 +37,8 @@ async function initialize(){
     db.Ticket = require('./tickets/ticket.model')(sequelize);
     db.Booking = require('./bookings/booking.model')(sequelize);
     db.Activity = require('./activities/activity.model')(sequelize);
+    db.ActivityCategory = require('./activities/activity-category.model')(sequelize);
+    db.ExpenseCategory = require('./expenses/expense-category.model')(sequelize);
 
     //relations
     db.Account.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
@@ -98,6 +100,18 @@ async function initialize(){
 
     db.Expense.hasMany(db.Activity);
     db.Activity.belongsTo(db.Expense);
+
+    db.User.hasMany(db.ActivityCategory, {onDelete: 'CASCADE'});
+    db.ActivityCategory.belongsTo(db.User);
+
+    db.User.hasMany(db.ExpenseCategory, {onDelete: 'CASCADE'});
+    db.ExpenseCategory.belongsTo(db.User);
+
+    db.ExpenseCategory.hasMany(db.Expense);
+    db.Expense.belongsTo(db.ExpenseCategory, {through: 'expense_category', as: 'category', foreignKey: 'categoryId'});
+   
+    db.ActivityCategory.hasMany(db.Activity);
+    db.Activity.belongsTo(db.ActivityCategory, {through: 'activity_category', as: 'category',foreignKey: 'categoryId'});
 
     try {
         await sequelize.authenticate();

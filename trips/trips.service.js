@@ -142,11 +142,9 @@ async function getTripByIdWithDetails(tripId){
             {               
                 model: db.Expense,            
                 attributes: [
-                    "id", 
-                    "name", 
+                    "id",                     
                     "date", 
-                    "description", 
-                    "category", 
+                    "description",                    
                     "amount", 
                     "currency",
                     "isPaid",

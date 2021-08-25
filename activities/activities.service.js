@@ -34,19 +34,24 @@ async function getTripActivities(accountId, tripId){
     return activityResponse;
  }
 
-async function createActivity(activity, expense, tripId, accountId){
+async function createActivity(activity, expense, tripId, categoryId, expenseCategoryId, accountId){
     const account = await auth.getAccountById(accountId);
 
     await tripsService.userOwnsTrip(account, tripId);
 
     const newActivity = await db.Activity.create(activity);
 
+    if(categoryId != null){
+        const category = await getActivityCategoryById(categoryId);
+        await newActivity.setCategory(category);
+    }
+
     const trip = await tripsService.getTripById(tripId);
 
     await newActivity.setTrip(trip);   
 
-    if(expense != null){
-       const newExpense = await expenseService.createExpense(expense, tripId, accountId);
+    if(expense != null && expenseCategoryId!= null){
+       const newExpense = await expenseService.createExpense(expense, tripId, expenseCategoryId,accountId);
        await newActivity.setExpense(newExpense);
     }
  
@@ -55,7 +60,7 @@ async function createActivity(activity, expense, tripId, accountId){
     return activityResponse;
  }
 
- async function updateActivity(updActivity, accountId){
+ async function updateActivity(updActivity, categoryId, accountId){
     const account = await auth.getAccountById(accountId);    
 
     const activity = await getActivityById(updActivity.id);
@@ -65,6 +70,11 @@ async function createActivity(activity, expense, tripId, accountId){
     await userOwnsTrip(account, trip.id);
 
     await activity.update(updActivity);
+
+    if(categoryId != null){
+        const category = await getActivityCategoryById(categoryId);
+        await newActivity.setCategory(category);
+    }
  
     const activityResponse = await getTripActivitiesResponse(trip.id);
  
@@ -91,6 +101,12 @@ async function getActivityById(id){
     return activity;
 }
 
+async function getActivityCategoryById(id){
+    const category = await db.ActivityCategory.findByPk(id);
+    if(!category) throw 'Activity category not found';
+    return category;
+}
+
 async function getActivityByIdResponse(id){
     const activity = await db.Activity.findByPk(id, {   
         attributes: [
@@ -108,18 +124,28 @@ async function getActivityByIdResponse(id){
         {
          model: db.Expense,            
          attributes: [
-             "id", 
-             "name", 
+             "id",
              "date", 
-             "description", 
-             "category", 
+             "description",
              "amount", 
              "currency",
              "createdDate",
              "updatedDate"
          ],
-     }
-    ]
+         include: [
+            {
+                model: db.ExpenseCategory,
+                as: "category",
+                attributes: ["id", "name"]
+            }
+        ],
+     },
+     {
+        model: db.ActivityCategory,
+        as: "category",
+        attributes: ["id", "name"]
+    }
+    ],    
 });
     
     return activity;
@@ -154,7 +180,19 @@ async function getTripActivitiesResponse(tripId){
                  "createdDate",
                  "updatedDate"
              ],
-         }
+             include: [
+                {
+                    model: db.ExpenseCategory,
+                    as: "category",
+                    attributes: ["id", "name"]
+                }
+            ],
+         },
+         {
+            model: db.ActivityCategory,
+            as: "category",
+            attributes: ["id", "name"]
+        }
         ]
     });
  
