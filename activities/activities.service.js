@@ -8,7 +8,8 @@ module.exports = {
     getActivity,
     createActivity,
     updateActivity,
-    deleteActivity
+    deleteActivity,
+    getActivityCategories
 }
 
 async function getTripActivities(accountId, tripId){
@@ -93,6 +94,19 @@ async function createActivity(activity, expense, tripId, categoryId, expenseCate
     await db.Activity.destroy({where:{id: activityId}});
  
    return "Ok";
+ }
+
+ async function getActivityCategories(accountId){
+    const account = await auth.getAccountById(accountId);
+    const user = await auth.getUserByAccountId(account.id);
+
+    const categoriesResponse = db.ActivityCategory.findAll(
+        {
+            where: {userId: user.id},
+            attributes: ["id", "name"]
+        }        
+    );
+    return categoriesResponse;
  }
 
 async function getActivityById(id){

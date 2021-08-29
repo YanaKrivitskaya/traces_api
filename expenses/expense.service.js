@@ -7,7 +7,9 @@ module.exports = {
     getExpense,
     createExpense,
     updateExpense,
-    deleteExpense
+    deleteExpense,
+    getExpenseCategories,
+    createExpenseCategory
 }
 
 async function getTripExpenses(accountId, tripId){
@@ -85,6 +87,34 @@ async function createExpense(expense, tripId, categoryId, accountId){
     await db.Expense.destroy({where:{id: expenseId}});
  
    return "Ok";
+ }
+
+ async function getExpenseCategories(accountId){
+    const account = await auth.getAccountById(accountId);
+    const user = await auth.getUserByAccountId(account.id);
+
+    const categoriesResponse = db.ExpenseCategory.findAll(
+        {
+            where: {userId: user.id},
+            attributes: ["id", "name"]
+        }        
+    );
+    return categoriesResponse;
+ }
+
+ async function createExpenseCategory(category, accountId){    
+    const user = await auth.getUserByAccountId(accountId);
+
+    const newCategory = await db.ExpenseCategory.create(category);   
+
+    await newCategory.setUser(user);
+     
+    const categoriesResponse = db.ExpenseCategory.findByPk(newCategory.id, 
+        {           
+            attributes: ["id", "name"]
+        }        
+    );
+    return categoriesResponse;
  }
 
  async function getExpenseById(id){

@@ -82,3 +82,4 @@ function deleteActivity(req, res, next){
     .then((response) => res.json({response}))
     .catch(next);
 }
+
