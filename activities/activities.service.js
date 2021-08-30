@@ -9,7 +9,8 @@ module.exports = {
     createActivity,
     updateActivity,
     deleteActivity,
-    getActivityCategories
+    getActivityCategories,
+    createActivityCategory
 }
 
 async function getTripActivities(accountId, tripId){
@@ -103,6 +104,21 @@ async function createActivity(activity, expense, tripId, categoryId, expenseCate
     const categoriesResponse = db.ActivityCategory.findAll(
         {
             where: {userId: user.id},
+            attributes: ["id", "name"]
+        }        
+    );
+    return categoriesResponse;
+ }
+
+ async function createActivityCategory(category, accountId){    
+    const user = await auth.getUserByAccountId(accountId);
+
+    const newCategory = await db.ActivityCategory.create(category);   
+
+    await newCategory.setUser(user);
+     
+    const categoriesResponse = db.ActivityCategory.findByPk(newCategory.id, 
+        {           
             attributes: ["id", "name"]
         }        
     );
