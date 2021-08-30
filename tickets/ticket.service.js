@@ -123,17 +123,20 @@ async function getTicketByIdResponse(id){
         {
          model: db.Expense,            
          attributes: [
-             "id", 
-             "name", 
+             "id",              
              "date", 
-             "description", 
-             "category", 
+             "description",            
              "amount", 
              "currency",
-             "isPaid",
-             "createdDate",
-             "updatedDate"
+             "isPaid"
          ],
+         include: [
+            {
+                model: db.ExpenseCategory,
+                as: "category",
+                attributes: ["id", "name"]
+            }
+        ],
      }
     ]
 });

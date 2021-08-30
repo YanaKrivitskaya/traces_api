@@ -29,12 +29,13 @@ function createBookingSchema(req, res, next) {
     const schema = Joi.object({        
         tripId: Joi.number().required(),        
         expense: Joi.object({
-            date: Joi.date().required(),
-            name: Joi.string().allow(null, ''),
-            category: Joi.string().allow(null, ''),
+            date: Joi.date().required(),            
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
             currency: Joi.string().allow(null, ''),
+            category: Joi.object({
+                name: Joi.string().required()
+            }).required()
         }).allow(null, ''),
         booking: Joi.object({
             name: Joi.string().required(),
