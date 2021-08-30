@@ -31,6 +31,14 @@ async function initialize(){
     db.NoteTag = require('./notes/note-tag.model')(sequelize);
     db.Visa = require('./visas/visa.model')(sequelize);
     db.VisaEntry = require('./visas/visa-entry.model')(sequelize);
+    db.Trip = require('./trips/trip.model')(sequelize);
+    db.UserTrip = require('./trips/user-trip.model')(sequelize);
+    db.Expense = require('./expenses/expense.model')(sequelize);
+    db.Ticket = require('./tickets/ticket.model')(sequelize);
+    db.Booking = require('./bookings/booking.model')(sequelize);
+    db.Activity = require('./activities/activity.model')(sequelize);
+    db.ActivityCategory = require('./activities/activity-category.model')(sequelize);
+    db.ExpenseCategory = require('./expenses/expense-category.model')(sequelize);
 
     //relations
     db.Account.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
@@ -62,6 +70,48 @@ async function initialize(){
 
     db.Visa.hasMany(db.VisaEntry);
     db.VisaEntry.belongsTo(db.Visa);
+
+    db.Account.hasMany(db.Trip, {foreignKey: 'createdBy'});
+    db.Trip.belongsTo(db.Account, {foreignKey: 'createdBy'});
+
+    db.Trip.belongsToMany(db.User, {through: 'user_trip', as: 'users', foreignKey: 'tripId'});
+    db.User.belongsToMany(db.Trip, {through: 'user_trip', as: 'trips', foreignKey: 'userId'});
+
+    db.Trip.hasMany(db.Expense);
+    db.Expense.belongsTo(db.Trip);
+
+    db.Trip.hasMany(db.Ticket);
+    db.Ticket.belongsTo(db.Trip);
+
+    db.User.hasMany(db.Ticket);
+    db.Ticket.belongsTo(db.User);
+
+    db.Expense.hasMany(db.Ticket);
+    db.Ticket.belongsTo(db.Expense);
+
+    db.Trip.hasMany(db.Booking);
+    db.Booking.belongsTo(db.Trip);
+
+    db.Expense.hasMany(db.Booking);
+    db.Booking.belongsTo(db.Expense);
+
+    db.Trip.hasMany(db.Activity);
+    db.Activity.belongsTo(db.Trip);
+
+    db.Expense.hasMany(db.Activity);
+    db.Activity.belongsTo(db.Expense);
+
+    db.User.hasMany(db.ActivityCategory, {onDelete: 'CASCADE'});
+    db.ActivityCategory.belongsTo(db.User);
+
+    db.User.hasMany(db.ExpenseCategory, {onDelete: 'CASCADE'});
+    db.ExpenseCategory.belongsTo(db.User);
+
+    db.ExpenseCategory.hasMany(db.Expense);
+    db.Expense.belongsTo(db.ExpenseCategory, {through: 'expense_category', as: 'category', foreignKey: 'categoryId'});
+   
+    db.ActivityCategory.hasMany(db.Activity);
+    db.Activity.belongsTo(db.ActivityCategory, {through: 'activity_category', as: 'category',foreignKey: 'categoryId'});
 
     try {
         await sequelize.authenticate();

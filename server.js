@@ -20,6 +20,14 @@ app.use('/notes', require('./notes/notes.controller'));
 app.use('/tags', require('./tags/tags.controller'));
 app.use('/profile', require('./profile/profile.controller'));
 app.use('/visas', require('./visas/visas.controller'));
+app.use('/trips', require('./trips/trips.controller'));
+app.use('/expenses', require('./expenses/expense.controller'));
+app.use('/expense-categories', require('./expenses/expense-category.controller'));
+app.use('/tickets', require('./tickets/ticket.controller'));
+app.use('/bookings', require('./bookings/bookings.controller'));
+app.use('/activities', require('./activities/activities.controller'));
+app.use('/activity-categories', require('./activities/activity-category.controller'));
+
 
 app.use(errorHandler);
 
