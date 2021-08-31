@@ -148,7 +148,8 @@ async function getActivityByIdResponse(id){
     const activity = await db.Activity.findByPk(id, {   
         attributes: [
         "id", 
-        "name",         
+        "name",
+        "location",
         "description",         
         "date",
         "image",        
@@ -192,7 +193,8 @@ async function getTripActivitiesResponse(tripId){
     const activityResponse = await db.Activity.findAll(
         {   attributes: [
             "id", 
-            "name",         
+            "name",
+            "location",
             "description",         
             "date",
             "image",        

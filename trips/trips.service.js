@@ -196,7 +196,8 @@ async function getTripByIdWithDetails(tripId){
                 attributes: [
                     "id", 
                     "expenseId",
-                    "name",         
+                    "name",
+                    "location",
                     "description",         
                     "date",
                     "image",        

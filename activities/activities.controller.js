@@ -39,7 +39,8 @@ function createActivitySchema(req, res, next) {
             }).required()
         }).allow(null, ''),
         activity: Joi.object({
-            name: Joi.string().required(),            
+            name: Joi.string().required(),
+            location: Joi.string().allow(null, ''),
             description: Joi.string().allow(null, ''),
             date: Joi.date().allow(null, ''),            
             isPlanned: Joi.bool().allow(null, ''),
@@ -60,7 +61,8 @@ function updateActivitySchema(req, res, next) {
     const schema = Joi.object({
         categoryId: Joi.number().allow(null, ''),
         activity: Joi.object({
-            name: Joi.string().required(),            
+            name: Joi.string().required(),
+            location: Joi.string().allow(null, ''),            
             description: Joi.string().allow(null, ''),
             date: Joi.date().allow(null, ''),            
             isPlanned: Joi.bool().allow(null, ''),
