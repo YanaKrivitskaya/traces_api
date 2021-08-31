@@ -51,7 +51,14 @@ async function createTicket(ticket, expense, tripId, userId, accountId){
     }
 
     if(expense != null){
-       const newExpense = await expenseService.createExpense(expense, tripId, accountId);
+        var category = expense.category;
+        if(category != null){
+            category = await expenseService.getExpenseCategoryByName(expense.category.name);
+            if(category == null){
+                category = await expenseService.createExpenseCategory(expense.category, accountId)
+            }
+        }
+       const newExpense = await expenseService.createExpense(expense, tripId, category.id, accountId);
        await newTicket.setExpense(newExpense);
     }
  
@@ -123,17 +130,20 @@ async function getTicketByIdResponse(id){
         {
          model: db.Expense,            
          attributes: [
-             "id", 
-             "name", 
+             "id",              
              "date", 
-             "description", 
-             "category", 
+             "description",            
              "amount", 
              "currency",
-             "isPaid",
-             "createdDate",
-             "updatedDate"
+             "isPaid"
          ],
+         include: [
+            {
+                model: db.ExpenseCategory,
+                as: "category",
+                attributes: ["id", "name"]
+            }
+        ],
      }
     ]
 });
@@ -169,11 +179,9 @@ async function getTripTicketsResponse(tripId){
             {
              model: db.Expense,            
              attributes: [
-                 "id", 
-                 "name", 
+                 "id",                
                  "date", 
-                 "description", 
-                 "category", 
+                 "description",                 
                  "amount", 
                  "currency",
                  "createdDate",

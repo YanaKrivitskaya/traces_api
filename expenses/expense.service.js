@@ -9,7 +9,8 @@ module.exports = {
     updateExpense,
     deleteExpense,
     getExpenseCategories,
-    createExpenseCategory
+    createExpenseCategory,
+    getExpenseCategoryByName
 }
 
 async function getTripExpenses(accountId, tripId){
@@ -126,6 +127,15 @@ async function createExpense(expense, tripId, categoryId, accountId){
 async function getExpenseCategoryById(id){
     const expenseCategory = await db.ExpenseCategory.findByPk(id);
     if(!expenseCategory) throw 'Expense category not found';
+    return expenseCategory;
+}
+
+async function getExpenseCategoryByName(name){
+    const expenseCategory = await db.ExpenseCategory.findOne({
+        where:{
+            name: name
+        }
+    });    
     return expenseCategory;
 }
 

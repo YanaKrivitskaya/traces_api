@@ -30,7 +30,7 @@ async function getTripBookings(accountId, tripId){
 
     await userOwnsTrip(account, trip.id);
  
-    const bookingResponse = await db.Booking.findByPk(bookingId);
+    const bookingResponse = await getBookingByIdResponse(bookingId);
     return bookingResponse;
  }
 
@@ -46,8 +46,15 @@ async function createBooking(booking, expense, tripId, accountId){
     await newBooking.setTrip(trip);   
 
     if(expense != null){
-       const newExpense = await expenseService.createExpense(expense, tripId, accountId);
-       await newBooking.setExpense(newExpense);
+        var category = expense.category;
+        if(category != null){
+            category = await expenseService.getExpenseCategoryByName(expense.category.name);
+            if(category == null){
+                category = await expenseService.createExpenseCategory(expense.category, accountId)
+            }
+        }
+        const newExpense = await expenseService.createExpense(expense, tripId, category.id, accountId);
+        await newBooking.setExpense(newExpense);
     }
  
     const bookingResponse = await getBookingByIdResponse(newBooking.id);
@@ -101,7 +108,7 @@ async function getBookingByIdResponse(id){
         "reservationNumber",
         "reservationUrl",
         "entryDate",
-        "exitdate",
+        "exitDate",
         "guestsQuantity",
         "image",
         "createdDate",
@@ -111,16 +118,19 @@ async function getBookingByIdResponse(id){
         {
          model: db.Expense,            
          attributes: [
-             "id", 
-             "name", 
+             "id",             
              "date", 
-             "description", 
-             "category", 
+             "description",            
              "amount", 
-             "currency",
-             "createdDate",
-             "updatedDate"
+             "currency"
          ],
+         include: [
+            {
+                model: db.ExpenseCategory,
+                as: "category",
+                attributes: ["id", "name"]
+            }
+        ],
      }
     ]
 });
@@ -138,7 +148,7 @@ async function getTripBookingsResponse(tripId){
             "reservationNumber",
             "reservationUrl",
             "entryDate",
-            "exitdate",
+            "exitDate",
             "guestsQuantity",
             "image",
             "createdDate",
@@ -149,17 +159,20 @@ async function getTripBookingsResponse(tripId){
             {
              model: db.Expense,            
              attributes: [
-                 "id", 
-                 "name", 
+                 "id",
                  "date", 
-                 "description", 
-                 "category", 
+                 "description",                
                  "amount", 
                  "currency",
-                 "isPaid",
-                 "createdDate",
-                 "updatedDate"
+                 "isPaid"
              ],
+             include: [
+                {
+                    model: db.ExpenseCategory,
+                    as: "category",
+                    attributes: ["id", "name"]
+                }
+            ],
          }
         ]
     });
