@@ -30,12 +30,13 @@ function createTicketSchema(req, res, next) {
         tripId: Joi.number().required(),
         userId: Joi.number().allow(null, ''),
         expense: Joi.object({
-            date: Joi.date().required(),
-            name: Joi.string().allow(null, ''),
-            category: Joi.string().allow(null, ''),
+            date: Joi.date().required(),            
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
-            currency: Joi.string().allow(null, ''),
+            currency: Joi.string().allow(null, ''),            
+            category: Joi.object({
+                name: Joi.string().required()
+            }).required()
         }).allow(null, ''),
         ticket: Joi.object({
             departureLocation: Joi.string().required(),

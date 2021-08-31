@@ -36,7 +36,7 @@ async function getTripActivities(accountId, tripId){
     return activityResponse;
  }
 
-async function createActivity(activity, expense, tripId, categoryId, expenseCategoryId, accountId){
+async function createActivity(activity, expense, tripId, categoryId, accountId){
     const account = await auth.getAccountById(accountId);
 
     await tripsService.userOwnsTrip(account, tripId);
@@ -52,8 +52,15 @@ async function createActivity(activity, expense, tripId, categoryId, expenseCate
 
     await newActivity.setTrip(trip);   
 
-    if(expense != null && expenseCategoryId!= null){
-       const newExpense = await expenseService.createExpense(expense, tripId, expenseCategoryId,accountId);
+    if(expense != null){
+        var category = expense.category;
+        if(category != null){
+            category = await expenseService.getExpenseCategoryByName(expense.category.name);
+            if(category == null){
+                category = await expenseService.createExpenseCategory(expense.category, accountId)
+            }
+        }
+       const newExpense = await expenseService.createExpense(expense, tripId, category.id, accountId);
        await newActivity.setExpense(newExpense);
     }
  
@@ -199,11 +206,9 @@ async function getTripActivitiesResponse(tripId){
             {
              model: db.Expense,            
              attributes: [
-                 "id", 
-                 "name", 
+                 "id",
                  "date", 
-                 "description", 
-                 "category", 
+                 "description",                 
                  "amount", 
                  "currency",
                  "isPaid",

@@ -29,14 +29,14 @@ function createActivitySchema(req, res, next) {
     const schema = Joi.object({        
         tripId: Joi.number().required(),
         categoryId: Joi.number().allow(null, ''),
-        expenseCategoryId: Joi.number().allow(null, ''),
         expense: Joi.object({
-            date: Joi.date().required(),
-            name: Joi.string().allow(null, ''),
-            category: Joi.string().allow(null, ''),
+            date: Joi.date().required(),            
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
             currency: Joi.string().allow(null, ''),
+            category: Joi.object({
+                name: Joi.string().required()
+            }).required()
         }).allow(null, ''),
         activity: Joi.object({
             name: Joi.string().required(),            
@@ -51,7 +51,7 @@ function createActivitySchema(req, res, next) {
 }
 
 function createActivity(req, res, next){
-    activitiesService.createActivity(req.body.activity, req.body.expense, req.body.tripId, req.body.categoryId, req.body.expenseCategoryId, req.user.id)
+    activitiesService.createActivity(req.body.activity, req.body.expense, req.body.tripId, req.body.categoryId, req.user.id)
     .then((activities) => res.json({activities}))
     .catch(next);
 }
