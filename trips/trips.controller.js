@@ -32,6 +32,7 @@ function getTripById(req, res, next){
 
 function tripSchema(req, res, next) {
     const schema = Joi.object({
+        id: Joi.number().allow(null, ''),
         name: Joi.string().required(),
         description: Joi.string().allow(null, ''),      
         coverImageUrl: Joi.string().allow(null, ''), 

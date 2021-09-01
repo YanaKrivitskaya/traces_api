@@ -69,11 +69,13 @@ async function getTrips(accountId){
 
     const trip = await getTripById(updTrip.id);
 
+    updTrip.coverImage = trip.coverImage;
+
     await userOwnsTrip(account, trip.id);
 
     await trip.update(updTrip);
  
-    const tripResponse = await getTripByIdWithDetails(tripId);
+    const tripResponse = await getTripByIdWithDetails(trip.id);
  
     return tripResponse;
  }
