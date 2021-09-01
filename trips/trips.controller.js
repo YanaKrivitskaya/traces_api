@@ -4,6 +4,9 @@ const tripsService = require('./trips.service');
 const authorize = require('../helpers/jwt_helper');
 const Joi = require('joi');
 const validateRequest = require('../helpers/validate_request');
+const multer  = require('multer')
+
+const upload = multer({ storage: multer.memoryStorage() })
 
 module.exports = router;
 
@@ -13,6 +16,7 @@ router.post('/', authorize(), tripSchema, createTrip);
 router.put('/:id', authorize(), tripSchema, updateTrip);
 router.put('/:id/users', authorize(), tripUserSchema, updateTripUsers);
 router.delete('/:id', authorize(), deleteTrip);
+router.post('/:id/image', authorize(),  upload.single('file'), updateTripImage);
 
 function getTrips(req, res, next){
     tripsService.getTrips(req.user.id)
@@ -64,6 +68,12 @@ function updateTripUsers(req, res, next){
 
 function deleteTrip(req, res, next){
     tripsService.deleteTrip(req.params.id, req.user.id)
+    .then((response) => res.json({response}))
+    .catch(next);
+}
+
+function updateTripImage(req, res, next){
+    tripsService.updateTripImage(req.params.id, req.file, req.user.id)
     .then((response) => res.json({response}))
     .catch(next);
 }

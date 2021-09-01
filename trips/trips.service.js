@@ -1,5 +1,6 @@
 const db = require('../db');
 const auth = require('../auth/auth.service');
+const fs = require('fs');
 
 module.exports = {
     getTrips,
@@ -10,7 +11,8 @@ module.exports = {
     updateTripUsers,
     getTripById,
     userOwnsTrip,
-    getTripByIdWithDetails
+    getTripByIdWithDetails,
+    updateTripImage
 }
 
 async function getTrips(accountId){
@@ -70,6 +72,22 @@ async function getTrips(accountId){
     await userOwnsTrip(account, trip.id);
 
     await trip.update(updTrip);
+ 
+    const tripResponse = await getTripByIdWithDetails(tripId);
+ 
+    return tripResponse;
+ }
+
+ async function updateTripImage(tripId, image, accountId){
+    const account = await auth.getAccountById(accountId);    
+
+    const trip = await getTripById(tripId);
+
+    await userOwnsTrip(account, trip.id);
+
+    trip.coverImage = image.buffer;
+
+    await trip.save();
  
     const tripResponse = await getTripByIdWithDetails(tripId);
  
