@@ -11,7 +11,8 @@ const upload = multer({ storage: multer.memoryStorage() })
 module.exports = router;
 
 router.get('/', authorize(), getTrips); 
-router.get('/:id', authorize(), getTripById); 
+router.get('/:id', authorize(), getTripById);
+router.get('/:id/day/:date', authorize(), getTripDay); 
 router.post('/', authorize(), tripSchema, createTrip);
 router.put('/:id', authorize(), tripSchema, updateTrip);
 router.put('/:id/users', authorize(), tripUserSchema, updateTripUsers);
@@ -21,6 +22,12 @@ router.post('/:id/image', authorize(),  upload.single('file'), updateTripImage);
 function getTrips(req, res, next){
     tripsService.getTrips(req.user.id)
     .then((trips) => res.json({trips}))
+    .catch(next);
+}
+
+function getTripDay(req, res, next){
+    tripsService.getTripDay(req.params.id, req.params.date, req.user.id)
+    .then((tripDay) => res.json({tripDay}))
     .catch(next);
 }
 
