@@ -8,7 +8,7 @@ module.exports = (sequelize, type) => {
         details:{type:DataTypes.TEXT},        
         entryDate:{type:DataTypes.DATE},
         exitDate:{type:DataTypes.DATE},       
-        questsQuantity:{type:DataTypes.INTEGER},
+        guestsQuantity:{type:DataTypes.INTEGER},
         image:{type:DataTypes.BLOB},       
         reservationNumber:{type:DataTypes.STRING(100)},
         reservationUrl:{type:DataTypes.STRING(200)},

@@ -1,6 +1,9 @@
 const db = require('../db');
 const auth = require('../auth/auth.service');
 const fs = require('fs');
+const { Op, where } = require("sequelize");
+var moment = require('moment'); // require
+moment().format(); 
 
 module.exports = {
     getTrips,
@@ -12,7 +15,8 @@ module.exports = {
     getTripById,
     userOwnsTrip,
     getTripByIdWithDetails,
-    updateTripImage
+    updateTripImage,
+    getTripDay
 }
 
 async function getTrips(accountId){
@@ -140,6 +144,150 @@ async function getTrips(accountId){
     await db.Trip.destroy({where:{id: tripId}});
  
    return "Ok";
+ }
+
+ async function getTripDay(tripId, date, accountId){
+    const account = await auth.getAccountById(accountId);    
+
+    const trip = await getTripById(tripId);
+
+    await userOwnsTrip(account, trip.id);
+
+    var dateFrom = moment(date);
+    var dateTo = moment(date).endOf("day");
+
+    const activities = await trip.getActivities({ where: {date: {
+        [Op.between]: [dateFrom, dateTo],
+        }},
+        attributes: [
+            "id", 
+            "expenseId",
+            "name",
+            "location",
+            "description",         
+            "date",
+            "image",        
+            "isPlanned",
+            "isCompleted",        
+            "createdDate",
+            "updatedDate"
+    ],
+    include:[
+        {
+            model: db.ActivityCategory,
+            as: "category",
+            attributes: ["id", "name"]
+        }
+    ]
+});
+
+    const bookings = await trip.getBookings({
+        where: {
+           [Op.or]:{
+               [Op.or]:[
+                {entryDate: {
+                    [Op.between]: [dateFrom, dateTo],
+                }},
+                {exitDate: {
+                    [Op.between]: [dateFrom, dateTo],
+                }}
+               ],
+               [Op.and]:[
+                {
+                    entryDate: {
+                        [Op.lt]: dateTo                        
+                    },
+                    exitDate: {                        
+                        [Op.gt]: dateFrom
+                    }
+                }
+               ]
+           }
+          },
+          attributes: [
+            "id", 
+            "expenseId",
+            "name", 
+            "location",
+            "details",
+            "reservationNumber",
+            "reservationUrl",
+            "entryDate",
+            "exitDate",
+            "guestsQuantity",
+            "image",
+            "createdDate",
+            "updatedDate"
+        ]
+    });
+
+    const tickets = await trip.getTickets({
+        where:{
+            [Op.or]:{
+                [Op.or]:[
+                 {departureDatetime: {
+                     [Op.between]: [dateFrom, dateTo],
+                 }},
+                 {arrivalDatetime: {
+                     [Op.between]: [dateFrom, dateTo],
+                 }}
+                ],
+                [Op.and]:[
+                 {
+                    departureDatetime: {
+                         [Op.lt]: dateTo                        
+                     },
+                    arrivalDatetime: {                        
+                         [Op.gt]: dateFrom
+                     }
+                 }
+                ]
+            },
+        },
+        attributes: [
+            "id", 
+            "expenseId",
+            "departureLocation", 
+            "arrivalLocation", 
+            "type", 
+            "departureDatetime", 
+            "arrivalDatetime", 
+            "carrier", 
+            "carrierNumber", 
+            "quantity",
+            "seats",
+            "details",
+            "reservationNumber",
+            "reservationUrl",
+            "createdDate",
+            "updatedDate"
+        ] 
+    }
+    );
+
+    const expenses = trip.getExpenses({
+        where:{date: {
+            [Op.between]: [dateFrom, dateTo],
+        }},
+        attributes: [
+            "id",                     
+            "date", 
+            "description",                    
+            "amount", 
+            "currency",
+            "isPaid",
+            "createdDate",
+            "updatedDate"
+        ]
+    });
+   
+    return {
+        "activities": activities.length > 0 ? activities : null,
+        "tickets": tickets.length > 0 ? tickets : null,
+        "bookings" : bookings.length > 0 ? bookings : null,
+        "expenses": expenses.length > 0 ? expenses : null,
+        "tripId": tripId
+    };
  }
 
  async function getTripById(tripId){

@@ -33,7 +33,8 @@ function createTicketSchema(req, res, next) {
             date: Joi.date().required(),            
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
-            currency: Joi.string().allow(null, ''),            
+            currency: Joi.string().allow(null, ''), 
+            isPaid: Joi.boolean(),           
             category: Joi.object({
                 name: Joi.string().required()
             }).required()

@@ -34,6 +34,7 @@ function createActivitySchema(req, res, next) {
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
             currency: Joi.string().allow(null, ''),
+            isPaid: Joi.boolean(),
             category: Joi.object({
                 name: Joi.string().required()
             }).required()
