@@ -132,16 +132,23 @@ async function getTrips(accountId){
  async function deleteTrip(tripId, accountId){
     const account = await auth.getAccountById(accountId);    
 
-    const trip = await getTripById(tripId);
+    await userOwnsTrip(account, tripId);
 
-    await userOwnsTrip(account, trip.id);
-
-    const tripUsers = await trip.getUsers();
+    /*const tripUsers = await trip.getUsers();
     for (const tripUser of tripUsers){
         await trip.removeUser(tripUser);
-    }
+    }*/
 
-    await db.Trip.destroy({where:{id: tripId}});
+    await db.Trip.update({ 
+        deleted: 1,
+        deletedDate: Date.now()
+     }, {
+        where: {
+          id: tripId
+        }
+      });
+
+    //await db.Trip.destroy({where:{id: tripId}});
  
    return "Ok";
  }
