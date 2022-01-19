@@ -22,15 +22,11 @@ async function getTripTickets(accountId, tripId){
  }
 
  async function getTicket(ticketId, accountId){
-    const account = await auth.getAccountById(accountId);
+    //const account = await auth.getAccountById(accountId);
 
     const ticket = await getTicketById(ticketId);
-
-    const trip = ticket.getTrip();
-
-    await userOwnsTrip(account, trip.id);
- 
-    const ticketResponse = await db.Ticket.findByPk(ticketId);
+    
+    const ticketResponse = await getTicketByIdResponse(ticket.id);
     return ticketResponse;
  }
 
@@ -67,18 +63,35 @@ async function createTicket(ticket, expense, tripId, userId, accountId){
     return ticketResponse;
  }
 
- async function updateTicket(updTicket, accountId){
+ async function updateTicket(updTicket, ticketExpense, tripId, accountId){
     const account = await auth.getAccountById(accountId);    
 
     const ticket = await getTicketById(updTicket.id);
 
-    const trip = ticket.getTrip();
+    const trip = await ticket.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await tripsService.userOwnsTrip(account, trip.id);
 
     await ticket.update(updTicket);
+
+    if(ticketExpense != null){
+        const expense = await expenseService.getExpenseByIdResponse(ticketExpense.id);
+        var category = ticketExpense.category;
+        if(category != null){
+            category = await expenseService.getExpenseCategoryByName(ticketExpense.category.name);
+            if(category == null){
+                category = await expenseService.createExpenseCategory(ticketExpense.category, accountId)
+            }
+        }
+        if(expense == null){
+            const newExpense = await expenseService.createExpense(ticketExpense, tripId, category.id, accountId);
+            await ticket.setExpense(newExpense);
+        }else{
+            await expenseService.updateExpense(ticketExpense, category.id, accountId);
+        }       
+    }
  
-    const ticketResponse = await getTripTicketsResponse(trip.id);
+    const ticketResponse = await getTicketByIdResponse(ticket.id);
  
     return ticketResponse;
  }

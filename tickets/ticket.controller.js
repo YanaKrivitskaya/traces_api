@@ -9,8 +9,8 @@ module.exports = router;
 
 router.get('/', authorize(), getTripTickets); 
 router.get('/:id', authorize(), getTicket); 
-router.post('/', authorize(), createTicketSchema, createTicket);
-router.put('/:id', authorize(), updateTicketSchema, updateTicket);
+router.post('/', authorize(), ticketSchema, createTicket);
+router.put('/:id', authorize(), ticketSchema, updateTicket);
 router.delete('/:id', authorize(), deleteTicket);
 
 function getTripTickets(req, res, next){
@@ -25,11 +25,12 @@ function getTicket(req, res, next){
     .catch(next);
 }
 
-function createTicketSchema(req, res, next) {
+function ticketSchema(req, res, next) {
     const schema = Joi.object({        
         tripId: Joi.number().required(),
         userId: Joi.number().allow(null, ''),
         expense: Joi.object({
+            id: Joi.number().allow(null, ''),
             date: Joi.date().required(),            
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
@@ -40,6 +41,7 @@ function createTicketSchema(req, res, next) {
             }).required()
         }).allow(null, ''),
         ticket: Joi.object({
+            id: Joi.number().allow(null, ''),
             departureLocation: Joi.string().required(),
             arrivalLocation: Joi.string().required(),
             type: Joi.string().required(),
@@ -63,26 +65,8 @@ function createTicket(req, res, next){
     .catch(next);
 }
 
-function updateTicketSchema(req, res, next) {
-    const schema = Joi.object({
-        departureLocation: Joi.string().required(),
-        arrivalLocation: Joi.string().required(),
-        type: Joi.string().required(),
-        departureDatetime: Joi.date().allow(null, ''),
-        arrivalDatetime: Joi.date().allow(null, ''),
-        carrier: Joi.string().allow(null, ''),
-        carrierNumber: Joi.string().allow(null, ''),
-        quantity: Joi.number().allow(null, ''),
-        seats: Joi.string().allow(null, ''),
-        details: Joi.string().allow(null, ''),
-        reservationNumber: Joi.string().allow(null, ''),
-        reservationUrl: Joi.string().allow(null, ''),
-    });
-    validateRequest(req, next, schema);
-}
-
 function updateTicket(req, res, next){
-    ticketsService.updateTicket(req.body, req.user.id)
+    ticketsService.updateTicket(req.body.ticket, req.body.expense, req.body.tripId,req.user.id)
     .then((tickets) => res.json({tickets}))
     .catch(next);
 }

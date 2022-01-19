@@ -26,13 +26,13 @@ async function getTripActivities(accountId, tripId){
  async function getActivity(activityId, accountId){
     const account = await auth.getAccountById(accountId);
 
-    const activity = await getActivityById(activityId);
+    /*const activity = await getActivityById(activityId);
 
     const trip = activity.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await userOwnsTrip(account, trip.id);*/
  
-    const activityResponse = await db.Activity.findByPk(activityId);
+    const activityResponse = await getActivityByIdResponse(activityId);
     return activityResponse;
  }
 
@@ -69,23 +69,39 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
     return activityResponse;
  }
 
- async function updateActivity(updActivity, categoryId, accountId){
+ async function updateActivity(updActivity, expense, tripId, categoryId, accountId){
     const account = await auth.getAccountById(accountId);    
 
     const activity = await getActivityById(updActivity.id);
 
-    const trip = activity.getTrip();
+    const trip = await activity.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await tripsService.userOwnsTrip(account, trip.id);
 
     await activity.update(updActivity);
 
     if(categoryId != null){
         const category = await getActivityCategoryById(categoryId);
-        await newActivity.setCategory(category);
+        await activity.setCategory(category);
+    }
+
+    if(expense != null){
+        var category = expense.category;
+        if(category != null){
+            category = await expenseService.getExpenseCategoryByName(expense.category.name);
+            if(category == null){
+                category = await expenseService.createExpenseCategory(expense.category, accountId)
+            }
+        }
+        if(expense == null){
+            const newExpense = await expenseService.createExpense(ticketExpense, tripId, category.id, accountId);
+            await activity.setExpense(newExpense);
+        }else{
+            await expenseService.updateExpense(expense, category.id, accountId);
+        }
     }
  
-    const activityResponse = await getTripActivitiesResponse(trip.id);
+    const activityResponse = await getActivityByIdResponse(activity.id);
  
     return activityResponse;
  }
@@ -97,7 +113,7 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
 
     const trip = activity.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await tripsService.userOwnsTrip(account, trip.id);
     
     await db.Activity.destroy({where:{id: activityId}});
  
@@ -133,7 +149,11 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
  }
 
 async function getActivityById(id){
-    const activity = await db.Activity.findByPk(id);
+    const activity = await db.Activity.findByPk(id/*, {
+        attributes:[
+            "id"
+        ]
+    }*/);
     if(!activity) throw 'Activity not found';
     return activity;
 }
@@ -165,6 +185,7 @@ async function getActivityByIdResponse(id){
              "id",
              "date", 
              "description",
+             "isPaid",
              "amount", 
              "currency",
              "createdDate",

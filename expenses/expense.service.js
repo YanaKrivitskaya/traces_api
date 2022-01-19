@@ -10,7 +10,9 @@ module.exports = {
     deleteExpense,
     getExpenseCategories,
     createExpenseCategory,
-    getExpenseCategoryByName
+    getExpenseCategoryByName,
+    getExpenseById,
+    getExpenseByIdResponse
 }
 
 async function getTripExpenses(accountId, tripId){
@@ -26,13 +28,13 @@ async function getTripExpenses(accountId, tripId){
  async function getExpense(expenseId, accountId){
     const account = await auth.getAccountById(accountId);
 
-    const expense = await getExpenseById(expenseId);
+    /*const expense = await getExpenseById(expenseId);
 
     const trip = expense.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await userOwnsTrip(account, trip.id);*/
  
-    const expenseResponse = await db.Expense.findByPk(expenseId);
+    const expenseResponse = await getExpenseByIdResponse(expenseId);
     return expenseResponse;
  }
 
@@ -60,18 +62,18 @@ async function createExpense(expense, tripId, categoryId, accountId){
 
     const expense = await getExpenseById(updExpense.id);
 
-    const trip = expense.getTrip();
+    const trip = await expense.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await tripsService.userOwnsTrip(account, trip.id);
 
     if(categoryId != null){
-        const expenseCategory = await getExpenseCategroyById(categoryId);
+        const expenseCategory = await getExpenseCategoryById(categoryId);
         await expense.setCategory(expenseCategory);
     }
 
     await expense.update(updExpense);
  
-    const expenseResponse = await getTripExpensesResponse(trip.id);
+    const expenseResponse = await getExpenseByIdResponse(expense.id);
  
     return expenseResponse;
  }

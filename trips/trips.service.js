@@ -161,7 +161,7 @@ async function getTrips(accountId){
     await userOwnsTrip(account, trip.id);
 
     var dateFrom = moment(date);
-    var dateTo = moment(date).endOf("day");
+    var dateTo = moment(date).add(1, 'd');
 
     const activities = await trip.getActivities({ where: {date: {
         [Op.between]: [dateFrom, dateTo],
@@ -317,69 +317,34 @@ async function getTripByIdWithDetails(tripId){
             {               
                 model: db.Expense,            
                 attributes: [
-                    "id",                     
-                    "date", 
-                    "description",                    
+                    "id",                   
                     "amount", 
                     "currency",
-                    "isPaid",
-                    "createdDate",
-                    "updatedDate"
+                    "isPaid"
                 ]
             },
             {
                 model: db.Booking,
                 attributes: [
-                    "id", 
-                    "expenseId",
-                    "name", 
-                    "location",
-                    "details",
-                    "reservationNumber",
-                    "reservationUrl",
+                    "id",                   
                     "entryDate",
-                    "exitDate",
-                    "guestsQuantity",
-                    "image",
-                    "createdDate",
-                    "updatedDate"
+                    "exitDate"
                 ]                
             },
             {
                 model: db.Ticket,
                 attributes: [
-                    "id", 
-                    "expenseId",
-                    "departureLocation", 
-                    "arrivalLocation", 
+                    "id",
                     "type", 
                     "departureDatetime", 
-                    "arrivalDatetime", 
-                    "carrier", 
-                    "carrierNumber", 
-                    "quantity",
-                    "seats",
-                    "details",
-                    "reservationNumber",
-                    "reservationUrl",
-                    "createdDate",
-                    "updatedDate"
+                    "arrivalDatetime"
                 ]                
             },
             {
                 model: db.Activity,
                 attributes: [
-                    "id", 
-                    "expenseId",
-                    "name",
-                    "location",
-                    "description",         
-                    "date",
-                    "image",        
-                    "isPlanned",
-                    "isCompleted",        
-                    "createdDate",
-                    "updatedDate"
+                    "id",
+                    "date"
                 ]
             }
         ]

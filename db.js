@@ -16,7 +16,8 @@ async function initialize(){
             user: process.env.DB_USER,
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
-            dialect: "mysql"
+            dialect: "mysql",
+            timezone: '+00:00',
         }
     );
 
@@ -86,8 +87,8 @@ async function initialize(){
     db.User.hasMany(db.Ticket);
     db.Ticket.belongsTo(db.User);
 
-    db.Expense.hasMany(db.Ticket);
-    db.Ticket.belongsTo(db.Expense);
+    db.Expense.hasOne(db.Ticket);
+    db.Ticket.belongsTo(db.Expense);    
 
     db.Trip.hasMany(db.Booking);
     db.Booking.belongsTo(db.Trip);
@@ -107,11 +108,11 @@ async function initialize(){
     db.User.hasMany(db.ExpenseCategory, {onDelete: 'CASCADE'});
     db.ExpenseCategory.belongsTo(db.User);
 
-    db.ExpenseCategory.hasMany(db.Expense);
-    db.Expense.belongsTo(db.ExpenseCategory, {through: 'expense_category', as: 'category', foreignKey: 'categoryId'});
+    db.ExpenseCategory.hasMany(db.Expense, {as: 'category', foreignKey: 'categoryId'});
+    db.Expense.belongsTo(db.ExpenseCategory, {as: 'category', foreignKey: 'categoryId'});
    
-    db.ActivityCategory.hasMany(db.Activity);
-    db.Activity.belongsTo(db.ActivityCategory, {through: 'activity_category', as: 'category',foreignKey: 'categoryId'});
+    db.ActivityCategory.hasMany(db.Activity, {as: 'category', foreignKey: 'categoryId'});
+    db.Activity.belongsTo(db.ActivityCategory, {as: 'category',foreignKey: 'categoryId'});
 
     try {
         await sequelize.authenticate();

@@ -7,8 +7,6 @@ const app = express();
 const port = process.env.PORT || 8080;
 const errorHandler = require('./helpers/error_handler');
 
-var connection  = require('../traces_api/db');
-
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(cookieParser());

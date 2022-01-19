@@ -9,8 +9,8 @@ module.exports = router;
 
 router.get('/', authorize(), getTripActivities); 
 router.get('/:id', authorize(), getActivity); 
-router.post('/', authorize(), createActivitySchema, createActivity);
-router.put('/:id', authorize(), updateActivitySchema, updateActivity);
+router.post('/', authorize(), activitySchema, createActivity);
+router.put('/:id', authorize(), activitySchema, updateActivity);
 router.delete('/:id', authorize(), deleteActivity);
 
 function getTripActivities(req, res, next){
@@ -25,21 +25,24 @@ function getActivity(req, res, next){
     .catch(next);
 }
 
-function createActivitySchema(req, res, next) {
+function activitySchema(req, res, next) {
     const schema = Joi.object({        
         tripId: Joi.number().required(),
         categoryId: Joi.number().allow(null, ''),
         expense: Joi.object({
+            id: Joi.number().allow(null, ''),
             date: Joi.date().required(),            
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
             currency: Joi.string().allow(null, ''),
             isPaid: Joi.boolean(),
             category: Joi.object({
+                id: Joi.number().allow(null, ''),
                 name: Joi.string().required()
             }).required()
         }).allow(null, ''),
         activity: Joi.object({
+            id: Joi.number().allow(null, ''),
             name: Joi.string().required(),
             location: Joi.string().allow(null, ''),
             description: Joi.string().allow(null, ''),
@@ -58,24 +61,8 @@ function createActivity(req, res, next){
     .catch(next);
 }
 
-function updateActivitySchema(req, res, next) {
-    const schema = Joi.object({
-        categoryId: Joi.number().allow(null, ''),
-        activity: Joi.object({
-            name: Joi.string().required(),
-            location: Joi.string().allow(null, ''),            
-            description: Joi.string().allow(null, ''),
-            date: Joi.date().allow(null, ''),            
-            isPlanned: Joi.bool().allow(null, ''),
-            isCompleted: Joi.bool().allow(null, ''),
-            image: Joi.string().allow(null, '')          
-        })        
-    });   
-    validateRequest(req, next, schema);
-}
-
 function updateActivity(req, res, next){
-    activitiesService.updateActivity(req.body, req.body.categoryId, req.user.id)
+    activitiesService.updateActivity(req.body.activity, req.body.expense, req.body.tripId, req.body.categoryId, req.user.id)
     .then((activities) => res.json({activities}))
     .catch(next);
 }

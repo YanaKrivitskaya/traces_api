@@ -26,9 +26,9 @@ async function getTripBookings(accountId, tripId){
 
     const booking = await getBookingById(bookingId);
 
-    const trip = booking.getTrip();
+    const trip = await booking.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await tripsService.userOwnsTrip(account, trip.id);
  
     const bookingResponse = await getBookingByIdResponse(bookingId);
     return bookingResponse;
@@ -62,18 +62,34 @@ async function createBooking(booking, expense, tripId, accountId){
     return bookingResponse;
  }
 
- async function updateBooking(updBooking, accountId){
+ async function updateBooking(updBooking, expense, tripId, accountId){
     const account = await auth.getAccountById(accountId);    
 
     const booking = await getBookingById(updBooking.id);
 
-    const trip = booking.getTrip();
+    const trip = await booking.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await tripsService.userOwnsTrip(account, trip.id);
 
     await booking.update(updBooking);
+
+    if(expense != null){
+        var category = expense.category;
+        if(category != null){
+            category = await expenseService.getExpenseCategoryByName(expense.category.name);
+            if(category == null){
+                category = await expenseService.createExpenseCategory(expense.category, accountId)
+            }
+        }
+        if(expense == null){
+            const newExpense = await expenseService.createExpense(ticketExpense, tripId, category.id, accountId);
+            await booking.setExpense(newExpense);
+        }else{
+            await expenseService.updateExpense(expense, category.id, accountId);
+        }
+    }
  
-    const bookingResponse = await getTripBookingsResponse(trip.id);
+    const bookingResponse = await getBookingByIdResponse(booking.id);
  
     return bookingResponse;
  }
@@ -83,9 +99,9 @@ async function createBooking(booking, expense, tripId, accountId){
     
     const booking = await getBookingById(bookingId);
 
-    const trip = booking.getTrip();
+    const trip = await booking.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await tripsService.userOwnsTrip(account, trip.id);
     
     await db.Booking.destroy({where:{id: bookingId}});
  
@@ -120,6 +136,7 @@ async function getBookingByIdResponse(id){
          attributes: [
              "id",             
              "date", 
+             "isPaid",
              "description",            
              "amount", 
              "currency"
