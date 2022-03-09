@@ -12,7 +12,8 @@ module.exports = {
     revokeToken,
     getUserByAccountId,
     getUserById,
-    accountOwnsUser
+    accountOwnsUser,
+    updateEmail
 };
 
 async function createAccount(params){
@@ -41,6 +42,22 @@ async function createAccount(params){
     await userGroup.save();
 
     return newAccount;
+}
+
+async function updateEmail(accountId, email){
+    //validate
+    if(await db.Account.findOne({where: {email: email}})){
+        throw `Email ${email} is already taken`;
+    }
+
+    const account = await getAccountById(accountId);
+
+    account.email = email;
+    account.emailVerified = false;
+
+    await account.save();
+
+    return account;
 }
 
 async function authenticate({email, password}, device){
