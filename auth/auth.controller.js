@@ -12,6 +12,7 @@ router.post('/register', registerSchema, register);
 router.post('/login', authenticateSchema, authenticate);
 router.post('/refresh-token', tokenSchema, refreshToken);
 router.post('/revoke-token', authorize(), tokenSchema, revokeToken);
+router.put('/email', authorize(), updateSchema, updateEmail);
 //router.get('/users/:id', authorize(), getUserById);
 
 function registerSchema(req, res, next) {
@@ -94,4 +95,17 @@ function setCookieToken(res, token){
         expires: new Date(Date.now() + 7*24*60*60*1000)
     };
     res.cookie('refreshToken', token, cookieOptions);
+}
+
+function updateSchema(req, res, next) {
+    const schema = Joi.object({
+        email: Joi.string().required()
+    });
+    validateRequest(req, next, schema);
+}
+
+function updateEmail(req, res, next){
+    authService.updateEmail(req.user.id, req.body.email)
+        .then((account)=> res.json({account}))
+        .catch(next);
 }
