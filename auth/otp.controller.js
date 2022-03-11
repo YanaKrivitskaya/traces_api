@@ -3,8 +3,15 @@ const db = require('../db');
 const nodemailer = require('nodemailer');
 const express = require('express');
 const authorize = require('../helpers/jwt_helper');
-//const {encode} = require('crypt');
 const router = express.Router();
+const fs = require('fs');
+const ejs = require('ejs');
+const {htmlToText} = require('html-to-text');
+const juice = require('juice');
+/*import fs from "fs";
+import ejs from "ejs";
+import { htmlToText } from "html-to-text";
+import juice from "juice";*/
 
 module.exports = router;
 //routes
@@ -47,10 +54,11 @@ async function verifyEmail(req, res, next) {
         //const encoded= await encode(JSON.stringify(details))
         const encoded = Buffer.from(JSON.stringify(details)).toString('base64')
 
-        const {message, subject_mail} = require('../email_templates/verification');
-        email_message=message(otp);
-        email_subject=subject_mail;
-        
+        /*const {message, subject_mail} = require('auth/email_templates/verification');
+        email_message=message(otp);*/
+        email_subject="[Traces]: Email Verification";
+
+               
         //Choose message template according type requestedconst encoded= await encode(JSON.stringify(details))
         if(type){
           if(type=="VERIFICATION"){
@@ -71,12 +79,26 @@ async function verifyEmail(req, res, next) {
             return res.status(400).send(response) 
           }*/
         }
-    
-        // Create nodemailer transporter
+
+        var templateVars = {
+          otpCode: otp
+        }
+
+        const templatePath = `email_templates/email_verification.html`;
+        
+
+        if (fs.existsSync(templatePath)) {
+          const template = fs.readFileSync(templatePath, "utf-8");
+          const html = ejs.render(template, templateVars);
+          const text = htmlToText(html);
+          const htmlWithStylesInlined = juice(html);    
+          
+          // Create nodemailer transporter
         const transporter = nodemailer.createTransport({
-          host: 'in-v3.mailjet.com',
+          host: 'smtp.gmail.com',
           port: 465,
           secure: true,
+          service: 'Gmail',
           auth: {
             user: `${process.env.EMAIL_ADDRESS}`,
             pass: `${process.env.EMAIL_PASSWORD}`
@@ -92,7 +114,9 @@ async function verifyEmail(req, res, next) {
           from: `"Traces Team"<${process.env.EMAIL_ADDRESS}>`,
           to: `${email}`,
           subject: email_subject,
-          text: email_message ,
+          html:htmlWithStylesInlined,
+          text:text
+          //text: email_message ,
         };
     
         await transporter.verify();
@@ -105,9 +129,11 @@ async function verifyEmail(req, res, next) {
             return res.send({"Status":"Success","Details":encoded});
           }
         });
+        }    
+        
       }
       catch(err){
-        const response={"Status":"Failure","Details": err.message}
+        const response={"Status":"Failure","Details": err}
         return res.status(400).send(response)
       }
     
