@@ -40,6 +40,7 @@ async function initialize(){
     db.Activity = require('./activities/activity.model')(sequelize);
     db.ActivityCategory = require('./activities/activity-category.model')(sequelize);
     db.ExpenseCategory = require('./expenses/expense-category.model')(sequelize);
+    db.Otp = require('./auth/otp.model')(sequelize);
 
     //relations
     db.Account.hasMany(db.RefreshToken, {onDelete: 'CASCADE'});
