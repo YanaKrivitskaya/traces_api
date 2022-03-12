@@ -23,11 +23,7 @@ async function verifyEmail(req, res, next) {
         let email_subject, email_message
         if(!email){
           throw("Email not provided");          
-        }
-        /*if(!type){
-          const response={"Status":"Failure","Details":"Type not provided"}
-          return res.status(400).send(response) 
-        }*/
+        }       
     
         //Generate OTP 
         const otp = otpGenerator.generate(4, { digits: true, upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
@@ -52,33 +48,9 @@ async function verifyEmail(req, res, next) {
     
         // Encrypt the details object
         //const encoded= await encode(JSON.stringify(details))
-        const encoded = Buffer.from(JSON.stringify(details)).toString('base64')
-
-        /*const {message, subject_mail} = require('auth/email_templates/verification');
-        email_message=message(otp);*/
-        email_subject="[Traces]: Email Verification";
-
-               
-        //Choose message template according type requestedconst encoded= await encode(JSON.stringify(details))
-        if(type){
-          if(type=="VERIFICATION"){
-            
-          }
-          /*else if(type=="FORGET"){
-            const {message, subject_mail} = require('../templates/email/email_forget');
-            email_message=message(otp)
-            email_subject=subject_mail
-          }
-          else if(type=="2FA"){
-            const {message, subject_mail} = require('../templates/email/email_2FA');
-            email_message=message(otp)
-            email_subject=subject_mail
-          }
-          else{
-            const response={"Status":"Failure","Details":"Incorrect Type Provided"}
-            return res.status(400).send(response) 
-          }*/
-        }
+        const encoded = Buffer.from(JSON.stringify(details)).toString('base64');
+        
+        email_subject="[Traces]: Email Verification";  
 
         var templateVars = {
           otpCode: otp
@@ -115,8 +87,7 @@ async function verifyEmail(req, res, next) {
           to: `${email}`,
           subject: email_subject,
           html:htmlWithStylesInlined,
-          text:text
-          //text: email_message ,
+          text:text          
         };
     
         await transporter.verify();
@@ -124,7 +95,7 @@ async function verifyEmail(req, res, next) {
         //Send Email
         await transporter.sendMail(mailOptions, (err, response) => {
           if (err) {
-              return res.status(400).send({"Status":"Failure","Details": err });
+            throw err.message;
           } else {
             return res.send({"Status":"Success","Details":encoded});
           }
@@ -133,11 +104,82 @@ async function verifyEmail(req, res, next) {
         
       }
       catch(err){
-        const response={"Status":"Failure","Details": err}
-        return res.status(400).send(response)
-      }
-    
+        throw err.message;
+      }    
 }
+
+router.post('/verify-otp', async (req, res, next) => {
+    try{
+     // var currentdate = new Date(); 
+      const {verification_key, otp, check} = req.body;
+  
+      if(!verification_key){
+        throw "Verification Key not provided";        
+      }
+      if(!otp){
+        throw "OTP not Provided";        
+      }
+      if(!check){
+        throw "Check not Provided";        
+      }
+  
+      let decoded;
+  
+      //Check if verification key is altered or not and store it in variable decoded after decryption
+      try{
+        let buff = new Buffer(verification_key, 'base64');        
+        decoded = buff.toString('ascii');
+      }
+      catch(err) {
+        throw err.message;
+      }
+  
+      var obj= JSON.parse(decoded)
+      const check_obj = obj.check
+  
+      // Check if the OTP was meant for the same email or phone number for which it is being verified 
+      if(check_obj!=check){
+        throw "OTP was not sent to this particular email";        
+      }
+  
+      const otp_instance= await db.Otp.findOne({where:{id: obj.otp_id}})
+  
+      //Check if OTP is available in the DB
+      if(otp_instance!=null){
+        //Check if OTP is already used or not
+        if(otp_instance.verified!=true){
+  
+            //Check if OTP is expired or not
+            if (!otp_instance.isExpired){
+  
+                //Check if OTP is equal to the OTP in the DB
+                if(otp===otp_instance.otp){
+                    // Mark OTP as verified or used
+                    otp_instance.verified=true
+                    otp_instance.save()
+  
+                    const response={"Status":"Success", "Details":"OTP Matched", "Check": check}
+                    return res.status(200).send(response)
+                }
+                else{
+                    throw "OTP NOT Matched";                    
+                }   
+            }
+            else{
+                throw "OTP Expired";                
+            }
+        }
+        else{
+            throw "OTP Already Used";            
+        }
+        }
+      else{
+          throw "OTP not defined";
+      }
+    }catch(err){
+        throw err.message;
+    }
+  });
 
 // To add minutes to the current time
 function AddMinutesToDate(date, minutes) {
