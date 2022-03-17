@@ -127,7 +127,7 @@ router.post('/verify-otp', async (req, res, next) => {
   
       //Check if verification key is altered or not and store it in variable decoded after decryption
       try{
-        let buff = new Buffer(verification_key, 'base64');        
+        let buff = new Buffer.from(verification_key, 'base64');        
         decoded = buff.toString('ascii');
       }
       catch(err) {
@@ -142,7 +142,7 @@ router.post('/verify-otp', async (req, res, next) => {
         throw "OTP was not sent to this particular email";        
       }
   
-      const otp_instance= await db.Otp.findOne({where:{id: obj.otp_id}})
+      const otp_instance= await db.Otp.findOne({where:{id: obj.otp_id}});
   
       //Check if OTP is available in the DB
       if(otp_instance!=null){
@@ -176,8 +176,8 @@ router.post('/verify-otp', async (req, res, next) => {
       else{
           throw "OTP not defined";
       }
-    }catch(err){
-        throw err.message;
+    }catch(err){        
+        return res.status(400).send(err);
     }
   });
 
