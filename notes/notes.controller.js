@@ -41,7 +41,7 @@ function updateNote(req, res, next){
 
 function deleteNote(req, res, next){
     notesService.deleteNote(req.params.id, req.user)
-        .then(()=> res.json({message: 'Note deleted'}))
+        .then(()=> res.json({message: 'Ok'}))
         .catch(next);
 }
 
