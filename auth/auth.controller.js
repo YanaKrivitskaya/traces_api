@@ -8,33 +8,17 @@ const validateRequest = require('../helpers/validate_request');
 module.exports = router;
 
 //routes
-router.post('/register', registerSchema, register);
 router.post('/login', authenticateSchema, authenticate);
 router.post('/refresh-token', tokenSchema, refreshToken);
 router.post('/revoke-token', authorize(), tokenSchema, revokeToken);
 router.put('/email', authorize(), updateSchema, updateEmail);
 //router.get('/users/:id', authorize(), getUserById);
 
-function registerSchema(req, res, next) {
-    const schema = Joi.object({
-        name: Joi.string().required(),        
-        email: Joi.string().email().required(),
-        password: Joi.string().min(6).required()
-        //confirmPassword: Joi.string().valid(Joi.ref('password')).required(),       
-    });
-    validateRequest(req, next, schema);
-}
-
-function register(req, res, next){
-    authService.createAccount(req.body)
-        .then(()=> res.json({message: 'Registration successful'}))
-        .catch(next);
-}
-
 function authenticateSchema(req, res, next) {
     const schema = Joi.object({
         email: Joi.string().required(),
-        password: Joi.string().required()
+        otp: Joi.string().required(),
+        verificationKey: Joi.string().required(),
     });
     validateRequest(req, next, schema);
 }
