@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const db = require('../db');
 const { Op } = require("sequelize");
 
+const otpService = require('../auth/otp.service');
+
 module.exports = {
-    createAccount, 
     authenticate,
     getAccountById,    
     refreshToken,
@@ -16,22 +16,19 @@ module.exports = {
     updateEmail
 };
 
-async function createAccount(params){
+async function createAccount(email){
     //validate
-    if(await db.Account.findOne({where: {email: params.email}})){
-        throw `Email ${params.email} is already taken`;
-    }
-
-    //hash password
-    if(params.password){
-        params.password = await bcrypt.hash(params.password, 10);
+    if(await db.Account.findOne({where: {email: email}})){
+        throw `Email ${email} is already taken`;
     }
 
     //save Account
-    var newAccount = await db.Account.create(params);
+    var newAccount = await db.Account.create({email: email});
+
+    var username = email.substr(0, email.indexOf('@')); 
 
     //create user entity
-    var user = await newAccount.createUser({name: params.name, createdBy: newAccount.id});
+    var user = await newAccount.createUser({name: username, createdBy: newAccount.id});
 
     //create family group
     var group = await newAccount.createGroup({name: "Family", });
@@ -60,13 +57,19 @@ async function updateEmail(accountId, email){
     return account;
 }
 
-async function authenticate({email, password}, device){
-    const account = await db.Account.scope('withPass').findOne({
+async function authenticate({email, verificationKey, otp}, device){
+    var account = await db.Account.findOne({
         where: {email: email}
     });    
 
-    if(!account || !(await bcrypt.compare(password, account.password))){        
-        throw "Username or password is incorrect";
+    if(!account){
+        account = await createAccount(email);
+    }
+
+    const verifiedEmail = await otpService.verifyOtp(verificationKey, otp, email);    
+
+    if(!verifiedEmail){
+        throw "Verification code is not correct for this email";
     }
 
     const accessToken = generateJwt(account); 
