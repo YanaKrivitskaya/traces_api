@@ -4,6 +4,7 @@ const Joi = require('joi');
 const authService = require('./auth.service');
 const authorize = require('../helpers/jwt_helper');
 const validateRequest = require('../helpers/validate_request');
+const otpService = require('../auth/otp.service');
 
 module.exports = router;
 
@@ -12,20 +13,27 @@ router.post('/login', authenticateSchema, authenticate);
 router.post('/refresh-token', tokenSchema, refreshToken);
 router.post('/revoke-token', authorize(), tokenSchema, revokeToken);
 router.put('/email', authorize(), updateSchema, updateEmail);
+router.post('/verify-email', verifyEmail);
+
+async function verifyEmail(req, res, next) {
+    otpService.sendOtpToEmail(req.body.email)
+    .then((verificationKey) => res.json({verificationKey}))
+    .catch(next);   
+}
 //router.get('/users/:id', authorize(), getUserById);
 
 function authenticateSchema(req, res, next) {
     const schema = Joi.object({
         email: Joi.string().required(),
-        otp: Joi.string().required(),
-        verificationKey: Joi.string().required(),
+        otp: Joi.string().required()
     });
     validateRequest(req, next, schema);
 }
 
 function authenticate(req, res, next){
     var device = req.headers["device-info"];
-    authService.authenticate(req.body, device)
+    var verificationKey = req.headers["verification-key"];
+    authService.authenticate(req.body, device, verificationKey)
         .then(({account, accessToken, refreshToken}) => {
             setCookieToken(res, refreshToken),
             res.json({account, accessToken})

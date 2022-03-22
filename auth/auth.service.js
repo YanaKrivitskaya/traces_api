@@ -57,7 +57,7 @@ async function updateEmail(accountId, email){
     return account;
 }
 
-async function authenticate({email, verificationKey, otp}, device){
+async function authenticate({email, otp}, device, verificationKey){
     var account = await db.Account.findOne({
         where: {email: email}
     });    
