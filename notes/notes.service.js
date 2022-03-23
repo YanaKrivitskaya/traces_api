@@ -17,15 +17,19 @@ async function getNotes(accountId){
     const user = await auth.getUserByAccountId(accountId);
    
     return notes = await user.getNotes({
+        attributes: [
+            "id",
+            "title",
+            "createdDate",
+            "updatedDate"
+        ],
         where: {deleted: 0}, 
         include: [
             {
                 model: db.Tag,
-                //attributes: ["id", "name"],
+                attributes: ["id", "name"],
                 as: "tags",
-                /*through: {
-                    attributes: [],
-                },*/
+                through: {attributes: []}
             }
         ]
     });
@@ -84,10 +88,20 @@ async function getNoteById(noteId){
 }
 
 async function getNoteByIdWithTags(noteId){
-    const note = await db.Note.findByPk(noteId, {include: [
+    const note = await db.Note.findByPk(noteId, {
+        attributes: [
+            "id",
+            "title",
+            "content",
+            "createdDate",
+            "updatedDate"
+        ],
+        include: [
         {
-            model: db.Tag,            
-            as: "tags"
+            model: db.Tag,
+            attributes: ["id", "name"],
+            as: "tags",
+            through: {attributes: []}
         }
     ]});
     if(!note) throw 'Note not found';
