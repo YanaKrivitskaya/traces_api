@@ -19,7 +19,9 @@ async function getNotes(accountId){
     return notes = await user.getNotes({
         attributes: [
             "id",
+            "userId",
             "title",
+            "content",
             "createdDate",
             "updatedDate"
         ],
@@ -91,10 +93,13 @@ async function getNoteByIdWithTags(noteId){
     const note = await db.Note.findByPk(noteId, {
         attributes: [
             "id",
+            "userId",
             "title",
             "content",
+            "deleted",
             "createdDate",
-            "updatedDate"
+            "updatedDate",
+            "deletedDate"
         ],
         include: [
         {
