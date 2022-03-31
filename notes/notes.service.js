@@ -1,6 +1,7 @@
 const db = require('../db');
 const auth = require('../auth/auth.service');
 const tagsService = require('../tags/tags.service');
+const tripsService = require('../trips/trips.service');
 
 module.exports = {
     getNotes,
@@ -10,7 +11,9 @@ module.exports = {
     getNoteById,
     getNoteByIdWithTags,
     deleteNoteTag,
-    addNoteTag
+    addNoteTag,
+    addNoteTrip,
+    deleteNoteTrip
 }
 
 async function getNotes(accountId){
@@ -32,6 +35,11 @@ async function getNotes(accountId){
                 attributes: ["id", "name"],
                 as: "tags",
                 through: {attributes: []}
+            },
+            {
+                model: db.Trip,
+                attributes: ["id", "name"],
+                as: "trip"
             }
         ]
     });
@@ -83,6 +91,22 @@ async function deleteNoteTag(noteId, tagId){
     return await getNoteByIdWithTags(noteId);
 }
 
+async function addNoteTrip(noteId, tripId){
+    const note = await getNoteById(noteId);
+    const trip = await tripsService.getTripById(tripId);
+
+    await note.setTrip(trip);
+    return await getNoteByIdWithTags(noteId);
+}
+
+async function deleteNoteTrip(noteId, tripId){
+    const note = await getNoteById(noteId);
+    const trip = await tripsService.getTripById(tripId);
+
+    await trip.removeNote(note);
+    return await getNoteByIdWithTags(noteId);
+}
+
 async function getNoteById(noteId){
     const note = await db.Note.findByPk(noteId);
     if(!note) throw 'Note not found';
@@ -107,6 +131,12 @@ async function getNoteByIdWithTags(noteId){
             attributes: ["id", "name"],
             as: "tags",
             through: {attributes: []}
+        },
+        {
+            model: db.Trip,
+            attributes: ["id", "name"],
+            as: "trip",
+            //through: {attributes: []}
         }
     ]});
     if(!note) throw 'Note not found';

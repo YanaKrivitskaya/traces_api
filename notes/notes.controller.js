@@ -13,7 +13,9 @@ router.post('/', authorize(), createNote);
 router.put('/:id', authorize(), updateNote);
 router.delete('/:id', authorize(), deleteNote);
 router.post('/:id/tags/:tagId', authorize(), addNoteTag);
+router.post('/:id/trips/:tripId', authorize(), addNoteTrip);
 router.delete('/:id/tags/:tagId', authorize(), deleteNoteTag);
+router.delete('/:id/trips/:tripId', authorize(), deleteNoteTrip);
 
 function getNotes(req, res, next){
     notesService.getNotes(req.user.id)
@@ -51,8 +53,20 @@ function addNoteTag(req, res, next){
         .catch(next);
 }
 
+function addNoteTrip(req, res, next){
+    notesService.addNoteTrip(req.params.id, req.params.tripId)
+        .then((note) => res.json({note}))
+        .catch(next);
+}
+
 function deleteNoteTag(req, res, next){
     notesService.deleteNoteTag(req.params.id, req.params.tagId)
+        .then((note) => res.json({note}))
+        .catch(next);
+}
+
+function deleteNoteTrip(req, res, next){
+    notesService.deleteNoteTrip(req.params.id, req.params.tripId)
         .then((note) => res.json({note}))
         .catch(next);
 }

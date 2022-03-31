@@ -100,6 +100,9 @@ async function initialize(){
     db.Trip.hasMany(db.Activity);
     db.Activity.belongsTo(db.Trip);
 
+    db.Trip.hasMany(db.Note);
+    db.Note.belongsTo(db.Trip);
+
     db.Expense.hasMany(db.Activity);
     db.Activity.belongsTo(db.Expense);
 
