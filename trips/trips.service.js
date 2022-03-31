@@ -16,7 +16,8 @@ module.exports = {
     userOwnsTrip,
     getTripByIdWithDetails,
     updateTripImage,
-    getTripDay
+    getTripDay,
+    getTripsList
 }
 
 async function getTrips(accountId){
@@ -33,6 +34,25 @@ async function getTrips(accountId){
                 through: {attributes: []},
             }
         ]
+    });
+ 
+    return tripsResponse;
+ }
+
+ async function getTripsList(accountId){
+    const account = await auth.getAccountById(accountId);
+ 
+    const tripsResponse = await account.getTrips({
+        attributes: ["id", "createdBy", "name", "startDate", "createdDate"], 
+        where: {deleted: 0}/*,
+        include:[
+            {
+                model: db.User,
+                as: "users",
+                attributes: ["id", "accountId", "name"],
+                through: {attributes: []},
+            }
+        ]*/
     });
  
     return tripsResponse;
