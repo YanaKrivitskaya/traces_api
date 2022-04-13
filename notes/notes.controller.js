@@ -4,6 +4,9 @@ const notesService = require('./notes.service');
 const authorize = require('../helpers/jwt_helper');
 const Joi = require('joi');
 const validateRequest = require('../helpers/validate_request');
+const multer  = require('multer')
+
+const upload = multer({ storage: multer.memoryStorage() })
 
 module.exports = router;
 
@@ -16,6 +19,7 @@ router.post('/:id/tags/:tagId', authorize(), addNoteTag);
 router.post('/:id/trips/:tripId', authorize(), addNoteTrip);
 router.delete('/:id/tags/:tagId', authorize(), deleteNoteTag);
 router.delete('/:id/trips/:tripId', authorize(), deleteNoteTrip);
+router.post('/:id/image', authorize(),  upload.single('file'), updateNoteImage);
 
 function getNotes(req, res, next){
     notesService.getNotes(req.user.id)
@@ -69,4 +73,10 @@ function deleteNoteTrip(req, res, next){
     notesService.deleteNoteTrip(req.params.id, req.params.tripId)
         .then((note) => res.json({note}))
         .catch(next);
+}
+
+function updateNoteImage(req, res, next){
+    notesService.updateNoteImage(req.params.id, req.file, req.user.id)
+    .then((response) => res.json({response}))
+    .catch(next);
 }
