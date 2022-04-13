@@ -13,7 +13,8 @@ module.exports = {
     deleteNoteTag,
     addNoteTag,
     addNoteTrip,
-    deleteNoteTrip
+    deleteNoteTrip,
+    updateNoteImage
 }
 
 async function getNotes(accountId){
@@ -25,6 +26,7 @@ async function getNotes(accountId){
             "userId",
             "title",
             "content",
+            "image",
             "createdDate",
             "updatedDate"
         ],
@@ -107,6 +109,20 @@ async function deleteNoteTrip(noteId, tripId){
     return await getNoteByIdWithTags(noteId);
 }
 
+async function updateNoteImage(noteId, image, accountId){
+    const account = await auth.getUserByAccountId(accountId);    
+
+    const note = await getNoteById(noteId);
+
+    await userOwnsNote(account, note.id);
+
+    note.image = image.buffer;
+
+    await note.save();
+ 
+    return await getNoteByIdWithTags(noteId);
+ }
+
 async function getNoteById(noteId){
     const note = await db.Note.findByPk(noteId);
     if(!note) throw 'Note not found';
@@ -120,6 +136,7 @@ async function getNoteByIdWithTags(noteId){
             "userId",
             "title",
             "content",
+            "image",
             "deleted",
             "createdDate",
             "updatedDate",
