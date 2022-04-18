@@ -11,6 +11,7 @@ const upload = multer({ storage: multer.memoryStorage() })
 module.exports = router;
 
 router.get('/', authorize(), getNotes);
+router.get('/trip', authorize(), getTripNotes);
 router.get('/:id', authorize(), getNoteById);
 router.post('/', authorize(), createNote);
 router.put('/:id', authorize(), updateNote);
@@ -23,6 +24,12 @@ router.post('/:id/image', authorize(),  upload.single('file'), updateNoteImage);
 
 function getNotes(req, res, next){
     notesService.getNotes(req.user.id)
+    .then((notes) => res.json({notes}))
+    .catch(next);
+}
+
+function getTripNotes(req, res, next){
+    notesService.getTripNotes(req.user.id, req.query.tripId)
     .then((notes) => res.json({notes}))
     .catch(next);
 }

@@ -2,6 +2,7 @@ const db = require('../db');
 const auth = require('../auth/auth.service');
 const tagsService = require('../tags/tags.service');
 const tripsService = require('../trips/trips.service');
+const { Op, where } = require("sequelize");
 
 module.exports = {
     getNotes,
@@ -14,7 +15,8 @@ module.exports = {
     addNoteTag,
     addNoteTrip,
     deleteNoteTrip,
-    updateNoteImage
+    updateNoteImage,
+    getTripNotes
 }
 
 async function getNotes(accountId){
@@ -46,6 +48,16 @@ async function getNotes(accountId){
         ]
     });
 }
+
+async function getTripNotes(accountId, tripId){
+    const account = await auth.getAccountById(accountId);
+
+    await tripsService.userOwnsTrip(account, tripId);
+
+    const notesResponse = await getTripNotesResponse(tripId);
+ 
+    return notesResponse;
+ }
 
 async function createNote(note, accountId){    
     const user = await auth.getUserByAccountId(accountId);
@@ -140,10 +152,8 @@ async function getNoteByIdWithTags(noteId){
             "title",
             "content",
             "image",
-            "deleted",
             "createdDate",
-            "updatedDate",
-            "deletedDate"
+            "updatedDate"
         ],
         include: [
         {
@@ -161,6 +171,41 @@ async function getNoteByIdWithTags(noteId){
     ]});
     if(!note) throw 'Note not found';
     return note;
+}
+
+async function getTripNotesResponse(tripId){
+    const notesResponse = await db.Note.findAll(
+        {  attributes: [
+            "id",
+            "userId",
+            "title",
+            "content",
+            "image",
+            "createdDate",
+            "updatedDate"
+        ],
+        where: {[Op.and]:[
+            {
+                tripId: tripId,
+                deleted: 0
+            }
+           ]},
+        include: [
+            {
+                model: db.Tag,
+                attributes: ["id", "name"],
+                as: "tags",
+                through: {attributes: []}
+            },
+            {
+                model: db.Trip,
+                attributes: ["id", "name"],
+                as: "trip"
+            }
+        ]
+    });
+ 
+    return notesResponse;
 }
 
 async function userOwnsNote(user, noteId){

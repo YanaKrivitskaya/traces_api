@@ -366,6 +366,32 @@ async function getTripByIdWithDetails(tripId){
                     "id",
                     "date"
                 ]
+            },
+            {
+                model: db.Note,
+                attributes: [
+                    "id",
+                    "userId",
+                    "title",
+                    "content",
+                    "image",
+                    "createdDate",
+                    "updatedDate"
+                ],
+                //where: {deleted: 0}, 
+                include: [
+                    {
+                        model: db.Tag,
+                        attributes: ["id", "name"],
+                        as: "tags",
+                        through: {attributes: []}
+                    }/*,
+                    {
+                        model: db.Trip,
+                        attributes: ["id", "name"],
+                        as: "trip"
+                    }*/
+                ]
             }
         ]
     });
