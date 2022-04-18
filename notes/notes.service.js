@@ -2,6 +2,7 @@ const db = require('../db');
 const auth = require('../auth/auth.service');
 const tagsService = require('../tags/tags.service');
 const tripsService = require('../trips/trips.service');
+const { Op, where } = require("sequelize");
 
 module.exports = {
     getNotes,

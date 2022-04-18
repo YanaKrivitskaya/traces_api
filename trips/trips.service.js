@@ -378,7 +378,7 @@ async function getTripByIdWithDetails(tripId){
                     "createdDate",
                     "updatedDate"
                 ],
-                where: {deleted: 0}, 
+                //where: {deleted: 0}, 
                 include: [
                     {
                         model: db.Tag,
