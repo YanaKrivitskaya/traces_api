@@ -1,16 +1,14 @@
 const db = require('../db');
 const auth = require('../auth/auth.service');
 const tripsService = require('../trips/trips.service');
+const categoriesService = require('../categories/categories.service');
 
 module.exports = {
     getTripExpenses,
     getExpense,
     createExpense,
     updateExpense,
-    deleteExpense,
-    getExpenseCategories,
-    createExpenseCategory,
-    getExpenseCategoryByName,
+    deleteExpense,    
     getExpenseById,
     getExpenseByIdResponse
 }
@@ -43,7 +41,7 @@ async function createExpense(expense, tripId, categoryId, accountId){
 
     await tripsService.userOwnsTrip(account, tripId);
 
-    const expenseCategory = await getExpenseCategoryById(categoryId);
+    const expenseCategory = await categoriesService.getCategoryById(categoryId);
 
     const newExpense = await db.Expense.create(expense);
 
@@ -67,7 +65,7 @@ async function createExpense(expense, tripId, categoryId, accountId){
     await tripsService.userOwnsTrip(account, trip.id);
 
     if(categoryId != null){
-        const expenseCategory = await getExpenseCategoryById(categoryId);
+        const expenseCategory = await categoriesService.getCategoryById(categoryId);
         await expense.setCategory(expenseCategory);
     }
 
@@ -92,53 +90,10 @@ async function createExpense(expense, tripId, categoryId, accountId){
    return "Ok";
  }
 
- async function getExpenseCategories(accountId){
-    const account = await auth.getAccountById(accountId);
-    const user = await auth.getUserByAccountId(account.id);
-
-    const categoriesResponse = db.ExpenseCategory.findAll(
-        {
-            where: {userId: user.id},
-            attributes: ["id", "name"]
-        }        
-    );
-    return categoriesResponse;
- }
-
- async function createExpenseCategory(category, accountId){    
-    const user = await auth.getUserByAccountId(accountId);
-
-    const newCategory = await db.ExpenseCategory.create(category);   
-
-    await newCategory.setUser(user);
-     
-    const categoriesResponse = db.ExpenseCategory.findByPk(newCategory.id, 
-        {           
-            attributes: ["id", "name"]
-        }        
-    );
-    return categoriesResponse;
- }
-
  async function getExpenseById(id){
     const expense = await db.Expense.findByPk(id);
     if(!expense) throw 'Expense not found';
     return expense;
-}
-
-async function getExpenseCategoryById(id){
-    const expenseCategory = await db.ExpenseCategory.findByPk(id);
-    if(!expenseCategory) throw 'Expense category not found';
-    return expenseCategory;
-}
-
-async function getExpenseCategoryByName(name){
-    const expenseCategory = await db.ExpenseCategory.findOne({
-        where:{
-            name: name
-        }
-    });    
-    return expenseCategory;
 }
 
 async function getExpenseByIdResponse(id){
@@ -154,8 +109,8 @@ async function getExpenseByIdResponse(id){
             "updatedDate"],
             include: [
                 {
-                    model: db.ExpenseCategory,
-                    as: "category",
+                    model: db.Category,
+                    as: "expenseCategory",
                     attributes: ["id", "name"]
                 }
             ],
@@ -177,8 +132,8 @@ async function getTripExpensesResponse(tripId){
         "updatedDate"],        
         where: {tripId: tripId},
         include: [{
-            model: db.ExpenseCategory,
-                as: "category",
+            model: db.Category,
+                as: "expenseCategory",
                 attributes: ["id", "name"]                
         }]
     });

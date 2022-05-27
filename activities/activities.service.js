@@ -2,15 +2,14 @@ const db = require('../db');
 const auth = require('../auth/auth.service');
 const tripsService = require('../trips/trips.service');
 const expenseService = require('../expenses/expense.service');
+const categoriesService = require('../categories/categories.service');
 
 module.exports = {
     getTripActivities,
     getActivity,
     createActivity,
     updateActivity,
-    deleteActivity,
-    getActivityCategories,
-    createActivityCategory
+    deleteActivity
 }
 
 async function getTripActivities(accountId, tripId){
@@ -44,7 +43,7 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
     const newActivity = await db.Activity.create(activity);
 
     if(categoryId != null){
-        const category = await getActivityCategoryById(categoryId);
+        const category = await categoriesService.getCategoryById(categoryId);
         await newActivity.setCategory(category);
     }
 
@@ -55,9 +54,9 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
     if(expense != null){
         var category = expense.category;
         if(category != null){
-            category = await expenseService.getExpenseCategoryByName(expense.category.name);
+            category = await categoriesService.getCategoryByName(expense.category.name);
             if(category == null){
-                category = await expenseService.createExpenseCategory(expense.category, accountId)
+                category = await categoriesService.createCategory(expense.category, accountId)
             }
         }
        const newExpense = await expenseService.createExpense(expense, tripId, category.id, accountId);
@@ -81,16 +80,16 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
     await activity.update(updActivity);
 
     if(categoryId != null){
-        const category = await getActivityCategoryById(categoryId);
+        const category = await categoriesService.getCategoryById(categoryId);
         await activity.setCategory(category);
     }
 
     if(expense != null){
         var category = expense.category;
         if(category != null){
-            category = await expenseService.getExpenseCategoryByName(expense.category.name);
+            category = await categoriesService.getCategoryByName(expense.category.name);
             if(category == null){
-                category = await expenseService.createExpenseCategory(expense.category, accountId)
+                category = await categoriesService.createCategory(expense.category, accountId)
             }
         }
         if(expense == null){
@@ -120,34 +119,6 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
    return "Ok";
  }
 
- async function getActivityCategories(accountId){
-    const account = await auth.getAccountById(accountId);
-    const user = await auth.getUserByAccountId(account.id);
-
-    const categoriesResponse = db.ActivityCategory.findAll(
-        {
-            where: {userId: user.id},
-            attributes: ["id", "name"]
-        }        
-    );
-    return categoriesResponse;
- }
-
- async function createActivityCategory(category, accountId){    
-    const user = await auth.getUserByAccountId(accountId);
-
-    const newCategory = await db.ActivityCategory.create(category);   
-
-    await newCategory.setUser(user);
-     
-    const categoriesResponse = db.ActivityCategory.findByPk(newCategory.id, 
-        {           
-            attributes: ["id", "name"]
-        }        
-    );
-    return categoriesResponse;
- }
-
 async function getActivityById(id){
     const activity = await db.Activity.findByPk(id/*, {
         attributes:[
@@ -159,7 +130,7 @@ async function getActivityById(id){
 }
 
 async function getActivityCategoryById(id){
-    const category = await db.ActivityCategory.findByPk(id);
+    const category = await db.Category.findByPk(id);
     if(!category) throw 'Activity category not found';
     return category;
 }
@@ -193,15 +164,15 @@ async function getActivityByIdResponse(id){
          ],
          include: [
             {
-                model: db.ExpenseCategory,
-                as: "category",
+                model: db.Category,
+                as: "expenseCategory",
                 attributes: ["id", "name"]
             }
         ],
      },
      {
-        model: db.ActivityCategory,
-        as: "category",
+        model: db.Category,
+        as: "activityCategory",
         attributes: ["id", "name"]
     }
     ],    
@@ -240,14 +211,14 @@ async function getTripActivitiesResponse(tripId){
              ],
              include: [
                 {
-                    model: db.ExpenseCategory,
+                    model: db.Category,
                     as: "category",
                     attributes: ["id", "name"]
                 }
             ],
          },
          {
-            model: db.ActivityCategory,
+            model: db.Category,
             as: "category",
             attributes: ["id", "name"]
         }

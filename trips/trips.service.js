@@ -202,7 +202,7 @@ async function getTrips(accountId){
     include:[
         {
             model: db.ActivityCategory,
-            as: "category",
+            as: "activityCategory",
             attributes: ["id", "name"]
         }
     ]
@@ -347,8 +347,8 @@ async function getTripByIdWithDetails(tripId){
                     "updatedDate"],
                     include: [
                         {
-                            model: db.ExpenseCategory,
-                            as: "category",
+                            model: db.Category,
+                            as: "expenseCategory",
                             attributes: ["id", "name"]
                         }
                     ],

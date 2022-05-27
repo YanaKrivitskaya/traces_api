@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const expensesService = require('./expense.service');
+const categoriesService = require('../categories/categories.service');
 const authorize = require('../helpers/jwt_helper');
 const Joi = require('joi');
 const validateRequest = require('../helpers/validate_request');
 
 module.exports = router;
 
-router.get('/', authorize(), getExpenseCategories);
-router.post('/', authorize(), createCategorySchema, createExpenseCategory); 
+router.get('/', authorize(), getCategories);
+router.post('/', authorize(), createCategorySchema, createCategory); 
 
 
-function getExpenseCategories(req, res, next){
-    expensesService.getExpenseCategories(req.user.id)
+function getCategories(req, res, next){
+    categoriesService.getCategories(req.user.id)
     .then((categories) => res.json({categories}))
     .catch(next);
 }
@@ -24,8 +24,8 @@ function createCategorySchema(req, res, next) {
     validateRequest(req, next, schema);
 }
 
-function createExpenseCategory(req, res, next){
-    expensesService.createExpenseCategory(req.body, req.user.id)
+function createCategory(req, res, next){
+    categoriesService.createCategory(req.body, req.user.id)
     .then((category) => res.json({category}))
     .catch(next);
 }
