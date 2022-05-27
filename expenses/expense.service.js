@@ -111,7 +111,7 @@ async function getExpenseByIdResponse(id){
                 {
                     model: db.Category,
                     as: "expenseCategory",
-                    attributes: ["id", "name"]
+                    attributes: ["id", "name", "icon", "color"]
                 }
             ],
         });
@@ -134,7 +134,7 @@ async function getTripExpensesResponse(tripId){
         include: [{
             model: db.Category,
                 as: "expenseCategory",
-                attributes: ["id", "name"]                
+                attributes: ["id", "name", "icon", "color"]                
         }]
     });
  

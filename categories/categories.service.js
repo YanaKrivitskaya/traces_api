@@ -15,7 +15,7 @@ module.exports = {
     const categoriesResponse = db.Category.findAll(
         {
             where: {userId: user.id},
-            attributes: ["id", "name"]
+            attributes: ["id", "name", "icon", "color"]
         }        
     );
     return categoriesResponse;

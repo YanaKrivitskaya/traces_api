@@ -19,7 +19,9 @@ function getCategories(req, res, next){
 
 function createCategorySchema(req, res, next) {
     const schema = Joi.object({        
-        name: Joi.string().required()
+        name: Joi.string().required(),
+        icon: Joi.string(),
+        color: Joi.string()
     });
     validateRequest(req, next, schema);
 }
