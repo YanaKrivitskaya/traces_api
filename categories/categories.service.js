@@ -5,7 +5,8 @@ module.exports = {
     getCategories,
     createCategory,
     getCategoryById,
-    getCategoryByName
+    getCategoryByName,
+    updateCategory
 }
 
  async function getCategories(accountId){
@@ -36,6 +37,23 @@ module.exports = {
     return categoriesResponse;
  }
 
+ async function updateCategory(updCategory, accountId){    
+    const user = await auth.getUserByAccountId(accountId);
+
+    const category = await getCategoryById(updCategory.id);    
+
+    await userOwnsCategory(user, category.id);
+
+    await category.update(updCategory);    
+     
+    const categoriesResponse = db.Category.findByPk(updCategory.id, 
+        {           
+            attributes: ["id", "name"]
+        }        
+    );
+    return categoriesResponse;
+ }
+
  async function getCategoryById(id){
     const category = await db.Category.findByPk(id);
     if(!category) throw 'Category not found';
@@ -49,4 +67,11 @@ async function getCategoryByName(name){
         }
     });    
     return category;
+}
+
+async function userOwnsCategory(user, categoryId){
+    const userCategories = await user.getCategories({ where: {id: categoryId}});
+
+    if(userCategories.length == 0) throw "No permissions for this category";
+    return true;
 }

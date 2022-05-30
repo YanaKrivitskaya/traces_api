@@ -44,7 +44,7 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
 
     if(categoryId != null){
         const category = await categoriesService.getCategoryById(categoryId);
-        await newActivity.setCategory(category);
+        await newActivity.setActivityCategory(category);
     }
 
     const trip = await tripsService.getTripById(tripId);
@@ -212,14 +212,14 @@ async function getTripActivitiesResponse(tripId){
              include: [
                 {
                     model: db.Category,
-                    as: "category",
+                    as: "expenseCategory",
                     attributes: ["id", "name"]
                 }
             ],
          },
          {
             model: db.Category,
-            as: "category",
+            as: "activityCategory",
             attributes: ["id", "name"]
         }
         ]

@@ -48,7 +48,7 @@ async function createExpense(expense, tripId, categoryId, accountId){
     const trip = await tripsService.getTripById(tripId);
 
     await newExpense.setTrip(trip);
-    await newExpense.setCategory(expenseCategory);
+    await newExpense.setExpenseCategory(expenseCategory);
  
     const expenseResponse = await getExpenseByIdResponse(newExpense.id);
  
