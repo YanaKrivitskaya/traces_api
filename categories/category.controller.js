@@ -21,7 +21,7 @@ function createCategorySchema(req, res, next) {
     const schema = Joi.object({        
         name: Joi.string().required(),
         icon: Joi.string(),
-        color: Joi.string()
+        color: Joi.number()
     });
     validateRequest(req, next, schema);
 }
