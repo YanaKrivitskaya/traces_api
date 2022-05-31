@@ -102,7 +102,7 @@ async function initialize(){
     db.Trip.hasMany(db.Note);
     db.Note.belongsTo(db.Trip);
 
-    db.Expense.hasMany(db.Activity);
+    db.Expense.hasOne(db.Activity);
     db.Activity.belongsTo(db.Expense);
 
     db.User.hasMany(db.Category, {onDelete: 'CASCADE'});

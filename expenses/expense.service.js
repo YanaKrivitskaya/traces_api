@@ -66,7 +66,7 @@ async function createExpense(expense, tripId, categoryId, accountId){
 
     if(categoryId != null){
         const expenseCategory = await categoriesService.getCategoryById(categoryId);
-        await expense.setCategory(expenseCategory);
+        await expense.setExpenseCategory(expenseCategory);
     }
 
     await expense.update(updExpense);

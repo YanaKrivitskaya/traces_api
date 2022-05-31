@@ -6,20 +6,48 @@ module.exports = {
     createCategory,
     getCategoryById,
     getCategoryByName,
-    updateCategory
+    updateCategory,
+    getCategoryUsage,
+    deleteCategory
 }
 
  async function getCategories(accountId){
     const account = await auth.getAccountById(accountId);
     const user = await auth.getUserByAccountId(account.id);
 
-    const categoriesResponse = db.Category.findAll(
+    const categoriesResponse = await db.Category.findAll(
         {
             where: {userId: user.id},
             attributes: ["id", "name", "icon", "color"]
         }        
     );
     return categoriesResponse;
+ }
+
+ async function getCategoryUsage(categoryId, accountId){
+    const account = await auth.getAccountById(accountId);
+    
+    var activitiesCount = await db.Activity.count({
+        where:{
+            categoryId: categoryId
+        }
+    });
+
+    var expensesCount = await db.Expense.count({
+        where:{
+            categoryId: categoryId
+        }
+    });
+
+    const categoriesResponse = await db.Category.findByPk(categoryId, 
+        {           
+            attributes: ["id", "name"]
+        }        
+    );
+    return {
+        activitiesCount: activitiesCount, 
+        expensesCount: expensesCount,
+        category: categoriesResponse};   
  }
 
  async function createCategory(category, accountId){    
@@ -29,7 +57,7 @@ module.exports = {
 
     await newCategory.setUser(user);
      
-    const categoriesResponse = db.Category.findByPk(newCategory.id, 
+    const categoriesResponse = await db.Category.findByPk(newCategory.id, 
         {           
             attributes: ["id", "name"]
         }        
@@ -46,12 +74,38 @@ module.exports = {
 
     await category.update(updCategory);    
      
-    const categoriesResponse = db.Category.findByPk(updCategory.id, 
+    const categoriesResponse = await db.Category.findByPk(updCategory.id, 
         {           
             attributes: ["id", "name"]
         }        
     );
     return categoriesResponse;
+ }
+
+ async function deleteCategory(categoryId, newCategoryId, accountId){
+    const user = await auth.getUserByAccountId(accountId);
+    
+    const category = await getCategoryById(categoryId);    
+
+    await userOwnsCategory(user, category.id);    
+
+    if(newCategoryId != null){
+        const newCategory = await getCategoryById(newCategoryId);
+        
+        const categoryActivities = await category.getActivityCategory();
+        for (const activity of categoryActivities){
+            await activity.setActivityCategory(newCategory);
+        }
+
+        const categoryExpenses= await category.getExpenseCategory();
+        for (const expense of categoryExpenses){
+            await expense.setExpenseCategory(newCategory);
+        }
+    }    
+    
+    await db.Category.destroy({where:{id: categoryId}});
+ 
+   return "Ok";
  }
 
  async function getCategoryById(id){

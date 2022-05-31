@@ -5,6 +5,7 @@ const fs = require('fs');
 const ejs = require('ejs');
 const {htmlToText} = require('html-to-text');
 const juice = require('juice');
+const path = require('path');
 
 module.exports ={
     sendOtpToEmail,
@@ -43,9 +44,12 @@ async function sendOtpToEmail(email){
         otpCode: otp
     }
 
-    const templatePath = `email_templates/email_verification.html`;
+    path.join(__dirname, `../email_templates/email_verification.html`)
+
+    const templatePath = path.join(__dirname, `../email_templates/email_verification.html`);    
 
     if (fs.existsSync(templatePath)) {
+        
         const template = fs.readFileSync(templatePath, "utf-8");
         const html = ejs.render(template, templateVars);
         const text = htmlToText(html);
@@ -65,7 +69,7 @@ async function sendOtpToEmail(email){
             //secureProtocol: "TLSv1_method"
             rejectUnauthorized: false
         }
-      });  
+      });       
   
       const mailOptions = {
         from: `"Traces Team"<${process.env.EMAIL_ADDRESS}>`,
@@ -80,6 +84,7 @@ async function sendOtpToEmail(email){
       //Send Email
       await transporter.sendMail(mailOptions, (err, response) => {
         if (err) {
+          console.log(err.message);
           throw err.message;
         }
       });
@@ -88,6 +93,7 @@ async function sendOtpToEmail(email){
       }  
     }
     catch(err){
+      console.log(err.message);
         throw err.message;
     } 
 }

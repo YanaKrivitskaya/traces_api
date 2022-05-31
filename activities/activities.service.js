@@ -81,7 +81,7 @@ async function createActivity(activity, expense, tripId, categoryId, accountId){
 
     if(categoryId != null){
         const category = await categoriesService.getCategoryById(categoryId);
-        await activity.setCategory(category);
+        await activity.setActivityCategory(category);
     }
 
     if(expense != null){
