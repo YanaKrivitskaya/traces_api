@@ -37,9 +37,8 @@ async function initialize(){
     db.Expense = require('./expenses/expense.model')(sequelize);
     db.Ticket = require('./tickets/ticket.model')(sequelize);
     db.Booking = require('./bookings/booking.model')(sequelize);
-    db.Activity = require('./activities/activity.model')(sequelize);
-    db.ActivityCategory = require('./activities/activity-category.model')(sequelize);
-    db.ExpenseCategory = require('./expenses/expense-category.model')(sequelize);
+    db.Activity = require('./activities/activity.model')(sequelize);    
+    db.Category = require('./categories/category.model')(sequelize);
     db.Otp = require('./auth/otp.model')(sequelize);
 
     //relations
@@ -103,20 +102,17 @@ async function initialize(){
     db.Trip.hasMany(db.Note);
     db.Note.belongsTo(db.Trip);
 
-    db.Expense.hasMany(db.Activity);
+    db.Expense.hasOne(db.Activity);
     db.Activity.belongsTo(db.Expense);
 
-    db.User.hasMany(db.ActivityCategory, {onDelete: 'CASCADE'});
-    db.ActivityCategory.belongsTo(db.User);
+    db.User.hasMany(db.Category, {onDelete: 'CASCADE'});
+    db.Category.belongsTo(db.User);
 
-    db.User.hasMany(db.ExpenseCategory, {onDelete: 'CASCADE'});
-    db.ExpenseCategory.belongsTo(db.User);
-
-    db.ExpenseCategory.hasMany(db.Expense, {as: 'category', foreignKey: 'categoryId'});
-    db.Expense.belongsTo(db.ExpenseCategory, {as: 'category', foreignKey: 'categoryId'});
+    db.Category.hasMany(db.Expense, {as: 'expenseCategory', foreignKey: 'categoryId'});
+    db.Expense.belongsTo(db.Category, {as: 'expenseCategory', foreignKey: 'categoryId'});
    
-    db.ActivityCategory.hasMany(db.Activity, {as: 'category', foreignKey: 'categoryId'});
-    db.Activity.belongsTo(db.ActivityCategory, {as: 'category',foreignKey: 'categoryId'});
+    db.Category.hasMany(db.Activity, {as: 'activityCategory', foreignKey: 'categoryId'});
+    db.Activity.belongsTo(db.Category, {as: 'activityCategory',foreignKey: 'categoryId'});
 
     try {
         await sequelize.authenticate();

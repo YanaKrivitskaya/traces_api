@@ -121,6 +121,7 @@ async function revokeToken({token}, device){
     refreshToken.revokedDate = Date.now();
     refreshToken.revokedByDevice = device;
     await refreshToken.save();
+    return "Ok";
 }
 
 async function getAccountById(id){
