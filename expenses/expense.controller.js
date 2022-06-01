@@ -57,6 +57,7 @@ function updateExpenseSchema(req, res, next) {
             description: Joi.string().allow(null, ''),
             amount: Joi.number().required(),
             currency: Joi.string().allow(null, ''),
+            isPaid: Joi.boolean(),
         })        
     });
     validateRequest(req, next, schema);
