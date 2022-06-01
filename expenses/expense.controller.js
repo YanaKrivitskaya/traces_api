@@ -51,6 +51,7 @@ function updateExpenseSchema(req, res, next) {
     const schema = Joi.object({
         categoryId: Joi.number().allow(null, ''),
         expense: Joi.object({
+            id: Joi.number().required(),
             date: Joi.date().required(),
             name: Joi.string().allow(null, ''),        
             description: Joi.string().allow(null, ''),

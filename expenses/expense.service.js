@@ -81,9 +81,9 @@ async function createExpense(expense, tripId, categoryId, accountId){
     
     const expense = await getExpenseById(expenseId);
 
-    const trip = expense.getTrip();
+    const trip = await expense.getTrip();
 
-    await userOwnsTrip(account, trip.id);
+    await tripsService.userOwnsTrip(account, trip.id);
     
     await db.Expense.destroy({where:{id: expenseId}});
  

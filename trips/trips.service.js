@@ -349,7 +349,7 @@ async function getTripByIdWithDetails(tripId){
                         {
                             model: db.Category,
                             as: "expenseCategory",
-                            attributes: ["id", "name"]
+                            attributes: ["id", "name", "icon", "color"]
                         }
                     ],
             },
