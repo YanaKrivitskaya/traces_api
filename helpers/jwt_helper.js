@@ -6,7 +6,7 @@ module.exports = authorize;
 
 function authorize() {   
     return [
-        jwt ({secret, algorithms: ["HS256"] }),
+        jwt ({secret: secret, algorithms: ["HS256"] }),
 
         async(req, res, next) =>{
             const user = await db.Account.findByPk(req.user.sub);
