@@ -373,9 +373,22 @@ async function getTripByIdWithDetails(tripId){
             {
                 model: db.Activity,
                 attributes: [
-                    "id",
-                    "date"
-                ]
+                    "id", 
+                    "name",                          
+                    "date",
+                    "image",        
+                    "isPlanned",
+                    "isCompleted",        
+                    "createdDate",
+                    "updatedDate"
+                ],
+                include: [
+                    {
+                        model: db.Category,
+                        as: "activityCategory",
+                        attributes: ["id", "name", "icon", "color"]
+                    }
+                ],
             },
             {
                 model: db.Note,
