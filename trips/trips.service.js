@@ -201,7 +201,7 @@ async function getTrips(accountId){
     ],
     include:[
         {
-            model: db.ActivityCategory,
+            model: db.Category,
             as: "activityCategory",
             attributes: ["id", "name"]
         }
