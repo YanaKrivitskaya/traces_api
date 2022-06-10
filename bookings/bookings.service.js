@@ -187,7 +187,7 @@ async function getTripBookingsResponse(tripId){
              include: [
                 {
                     model: db.Category,
-                    as: "category",
+                    as: "expenseCategory",
                     attributes: ["id", "name"]
                 }
             ],
