@@ -2,6 +2,7 @@ const db = require('../db');
 const auth = require('../auth/auth.service');
 const tripsService = require('../trips/trips.service');
 const expenseService = require('../expenses/expense.service');
+const categoriesService = require('../categories/categories.service');
 
 module.exports = {
     getTripTickets,
@@ -49,9 +50,9 @@ async function createTicket(ticket, expense, tripId, userId, accountId){
     if(expense != null){
         var category = expense.category;
         if(category != null){
-            category = await expenseService.getExpenseCategoryByName(expense.category.name);
+            category = await categoriesService.getCategoryByName(expense.category.name);
             if(category == null){
-                category = await expenseService.createExpenseCategory(expense.category, accountId)
+                category = await categoriesService.createCategory(expense.category, accountId)
             }
         }
        const newExpense = await expenseService.createExpense(expense, tripId, category.id, accountId);
@@ -78,9 +79,9 @@ async function createTicket(ticket, expense, tripId, userId, accountId){
         const expense = await expenseService.getExpenseByIdResponse(ticketExpense.id);
         var category = ticketExpense.category;
         if(category != null){
-            category = await expenseService.getExpenseCategoryByName(ticketExpense.category.name);
+            category = await categoriesService.getCategoryByName(expense.category.name);
             if(category == null){
-                category = await expenseService.createExpenseCategory(ticketExpense.category, accountId)
+                category = await categoriesService.createCategory(expense.category, accountId)
             }
         }
         if(expense == null){
@@ -152,8 +153,8 @@ async function getTicketByIdResponse(id){
          ],
          include: [
             {
-                model: db.ExpenseCategory,
-                as: "category",
+                model: db.Category,
+                as: "expenseCategory",
                 attributes: ["id", "name"]
             }
         ],
