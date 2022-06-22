@@ -302,6 +302,7 @@ async function getTrips(accountId){
             "description",                    
             "amount", 
             "currency",
+            "amountUSD",
             "isPaid",
             "createdDate",
             "updatedDate"
@@ -342,6 +343,7 @@ async function getTripByIdWithDetails(tripId){
                     "description",
                     "amount", 
                     "currency",
+                    "amountUSD",
                     "isPaid",
                     "createdDate",
                     "updatedDate"],
