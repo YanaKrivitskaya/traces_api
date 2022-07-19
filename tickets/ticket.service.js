@@ -20,7 +20,7 @@ async function getTripTickets(accountId, tripId){
     const ticketResponse = await getTripTicketsResponse(tripId);
  
     return ticketResponse;
- }
+ } 
 
  async function getTicket(ticketId, accountId){
     //const account = await auth.getAccountById(accountId);

@@ -142,3 +142,4 @@ async function getTripExpensesResponse(tripId){
  
     return expenseResponse;
 }
+

@@ -13,8 +13,7 @@ module.exports = {
     deleteTrip,
     updateTripUsers,
     getTripById,
-    userOwnsTrip,
-    getTripByIdWithDetails,
+    userOwnsTrip,    
     updateTripImage,
     getTripDay,
     getTripsList
@@ -64,10 +63,18 @@ async function getTrips(accountId){
     await getTripById(tripId);
 
     await userOwnsTrip(account, tripId);
- 
-    const tripResponse = await getTripByIdWithDetails(tripId);
- 
-    return tripResponse;
+
+    var tripResponse = await getTripByIdBasic(tripId); 
+
+    var res = tripResponse.get({plain: true});    
+
+    res.bookings = await getTripBookingsBasicInfo(tripId);
+    res.expenses = await getTripExpensesBasicInfo(tripId);
+    res.tickets = await getTripTicketsBasicInfo(tripId);
+    res.activities = await getTripActivitiesBasicInfo(tripId);
+    res.notes = await getTripNotesBasicInfo(tripId);
+
+    return res ;
  }
 
  async function createTrip(trip, accountId){
@@ -324,7 +331,7 @@ async function getTrips(accountId){
     return trip;
 }
 
-async function getTripByIdWithDetails(tripId){
+async function getTripByIdBasic(tripId){
     const tripResponse = await db.Trip.findByPk(tripId, {
         attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
         where: {deleted: 0},
@@ -334,93 +341,117 @@ async function getTripByIdWithDetails(tripId){
                 as: "users",
                 attributes: ["id", "accountId", "name"],
                 through: {attributes: []},
-            },
-            {               
-                model: db.Expense,            
-                attributes: [
-                    "id", 
-                    "date", 
-                    "description",
-                    "amount", 
-                    "currency",
-                    "amountUSD",
-                    "isPaid",
-                    "createdDate",
-                    "updatedDate"],
-                    include: [
-                        {
-                            model: db.Category,
-                            as: "expenseCategory",
-                            attributes: ["id", "name", "icon", "color"]
-                        }
-                    ],
-            },
-            {
-                model: db.Booking,
-                attributes: [
-                    "id",                   
-                    "entryDate",
-                    "exitDate"
-                ]                
-            },
-            {
-                model: db.Ticket,
-                attributes: [
-                    "id",
-                    "type", 
-                    "departureDatetime", 
-                    "arrivalDatetime"
-                ]                
-            },
-            {
-                model: db.Activity,
-                attributes: [
-                    "id", 
-                    "name",                          
-                    "date",
-                    "image",        
-                    "isPlanned",
-                    "isCompleted",        
-                    "createdDate",
-                    "updatedDate"
-                ],
-                include: [
-                    {
-                        model: db.Category,
-                        as: "activityCategory",
-                        attributes: ["id", "name", "icon", "color"]
-                    }
-                ],
-            },
-            {
-                model: db.Note,
-                attributes: [
-                    "id",
-                    "userId",
-                    "title",
-                    "content",
-                    "image",
-                    "createdDate",
-                    "updatedDate"
-                ],
-                //where: {deleted: 0}, 
-                include: [
-                    {
-                        model: db.Tag,
-                        attributes: ["id", "name"],
-                        as: "tags",
-                        through: {attributes: []}
-                    }/*,
-                    {
-                        model: db.Trip,
-                        attributes: ["id", "name"],
-                        as: "trip"
-                    }*/
-                ]
-            }
+            }            
         ]
     });
     return tripResponse;
+}
+
+async function getTripNotesBasicInfo(tripId){
+    const notesResponse = await db.Note.findAll(
+        {  attributes: [
+            "id",
+            "userId",
+            "title",
+            "content",
+            "image",
+            "createdDate",
+            "updatedDate"
+        ],                 
+        include: [
+            {
+                model: db.Tag,
+                attributes: ["id", "name"],
+                as: "tags",
+                through: {attributes: []}
+            }
+        ],
+        where: {[Op.and]:[
+            {
+                tripId: tripId,
+                deleted: 0
+            }
+           ]}        
+    });
+ 
+    return notesResponse;
+}
+
+async function getTripActivitiesBasicInfo(tripId){
+    const activityResponse = await db.Activity.findAll(
+        {   attributes: [
+            "id", 
+            "name",                          
+            "date",
+            "image",        
+            "isPlanned",
+            "isCompleted",        
+            "createdDate",
+            "updatedDate"
+        ],
+        include: [
+            {
+                model: db.Category,
+                as: "activityCategory",
+                attributes: ["id", "name", "icon", "color"]
+            }
+        ],
+        where: {tripId: tripId}        
+    });
+ 
+    return activityResponse;
+}
+
+async function getTripTicketsBasicInfo(tripId){
+    const ticketResponse = await db.Ticket.findAll(
+        {   attributes: [
+                "id",
+                "type", 
+                "departureDatetime", 
+                "arrivalDatetime"
+        ], 
+        where: {tripId: tripId}
+    });
+ 
+    return ticketResponse;
+}
+
+async function getTripExpensesBasicInfo(tripId){
+    const expenseResponse = await db.Expense.findAll(
+    {   attributes: [
+        "id", 
+        "date", 
+        "description",
+        "amount", 
+        "currency",
+        "amountUSD",
+        "isPaid",
+        "createdDate",
+        "updatedDate"],
+        include: [
+            {
+                model: db.Category,
+                as: "expenseCategory",
+                attributes: ["id", "name", "icon", "color"]
+            }
+        ],       
+        where: {tripId: tripId}
+    });
+ 
+    return expenseResponse;
+}
+
+async function getTripBookingsBasicInfo(tripId){
+    const bookingResponse = await db.Booking.findAll(
+        {   attributes: [
+                "id",                   
+                "entryDate",
+                "exitDate"
+        ], 
+        where: {tripId: tripId}
+    });
+ 
+    return bookingResponse;
 }
 
  async function userOwnsTrip(account, tripId){

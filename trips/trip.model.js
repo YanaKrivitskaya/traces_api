@@ -12,6 +12,11 @@ module.exports = (sequelize, type) => {
         updatedDate:{type:DataTypes.DATE},
         deleted:{type:DataTypes.BOOLEAN, defaultValue: 0},
         deletedDate:{type:DataTypes.DATE},
+        tripBookings: {type: DataTypes.VIRTUAL},
+        tripExpenses: {type: DataTypes.VIRTUAL},
+        tripActivities: {type: DataTypes.VIRTUAL},
+        tripTickets: {type: DataTypes.VIRTUAL},
+        tripNotes: {type: DataTypes.VIRTUAL},
     },{
         createdAt: 'createdDate',
         updatedAt: 'updatedDate'
