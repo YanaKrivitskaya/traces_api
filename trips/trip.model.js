@@ -8,15 +8,11 @@ module.exports = (sequelize, type) => {
         coverImage:{type:DataTypes.BLOB()},
         startDate:{type:DataTypes.DATE, allowNull: false},
         endDate:{type:DataTypes.DATE},
+        defaultCurrency:{type:DataTypes.STRING(3)},
         createdDate:{type:DataTypes.DATE},
         updatedDate:{type:DataTypes.DATE},
         deleted:{type:DataTypes.BOOLEAN, defaultValue: 0},
-        deletedDate:{type:DataTypes.DATE},
-        tripBookings: {type: DataTypes.VIRTUAL},
-        tripExpenses: {type: DataTypes.VIRTUAL},
-        tripActivities: {type: DataTypes.VIRTUAL},
-        tripTickets: {type: DataTypes.VIRTUAL},
-        tripNotes: {type: DataTypes.VIRTUAL},
+        deletedDate:{type:DataTypes.DATE}
     },{
         createdAt: 'createdDate',
         updatedAt: 'updatedDate'

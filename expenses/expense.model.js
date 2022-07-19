@@ -8,6 +8,7 @@ module.exports = (sequelize, type) => {
         amount:{type:DataTypes.DECIMAL, allowNull: false},
         currency:{type:DataTypes.STRING(3)},
         amountUSD:{type:DataTypes.DECIMAL},
+        amountDTC:{type:DataTypes.DECIMAL},
         isPaid:{type:DataTypes.BOOLEAN},
         createdDate:{type:DataTypes.DATE},
         updatedDate:{type:DataTypes.DATE}

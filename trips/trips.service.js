@@ -310,6 +310,7 @@ async function getTrips(accountId){
             "amount", 
             "currency",
             "amountUSD",
+            "amountDTC",
             "isPaid",
             "createdDate",
             "updatedDate"
@@ -333,7 +334,7 @@ async function getTrips(accountId){
 
 async function getTripByIdBasic(tripId){
     const tripResponse = await db.Trip.findByPk(tripId, {
-        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
+        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate", "defaultCurrency"], 
         where: {deleted: 0},
         include:[
             {               
@@ -425,6 +426,7 @@ async function getTripExpensesBasicInfo(tripId){
         "amount", 
         "currency",
         "amountUSD",
+        "amountDTC",
         "isPaid",
         "createdDate",
         "updatedDate"],

@@ -51,7 +51,8 @@ function tripSchema(req, res, next) {
         description: Joi.string().allow(null, ''),      
         coverImageUrl: Joi.string().allow(null, ''), 
         startDate: Joi.date().required(),
-        endDate: Joi.date().allow(null, '')           
+        endDate: Joi.date().allow(null, ''),
+        defaultCurrency: Joi.string().allow(null, ''),
     });
     validateRequest(req, next, schema);
 }

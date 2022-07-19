@@ -36,6 +36,7 @@ function createExpenseSchema(req, res, next) {
             amount: Joi.number().required(),
             currency: Joi.string(),
             amountUSD: Joi.number().allow(null, ''),
+            amountDTC: Joi.number().allow(null, ''),
             isPaid: Joi.boolean(),
         })
     });
@@ -59,6 +60,7 @@ function updateExpenseSchema(req, res, next) {
             amount: Joi.number().required(),
             currency: Joi.string().allow(null, ''),
             amountUSD: Joi.number().allow(null, ''),
+            amountDTC: Joi.number().allow(null, ''),
             isPaid: Joi.boolean(),
         })        
     });
