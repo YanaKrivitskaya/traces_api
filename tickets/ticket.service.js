@@ -84,7 +84,7 @@ async function createTicket(ticket, expense, tripId, userId, accountId){
                 category = await categoriesService.createCategory(expense.category, accountId)
             }
         }
-        if(expense == null){
+        if(expense.id == null){
             const newExpense = await expenseService.createExpense(ticketExpense, tripId, category.id, accountId);
             await ticket.setExpense(newExpense);
         }else{
