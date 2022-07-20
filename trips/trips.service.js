@@ -64,17 +64,9 @@ async function getTrips(accountId){
 
     await userOwnsTrip(account, tripId);
 
-    var tripResponse = await getTripByIdBasic(tripId); 
-
-    var res = tripResponse.get({plain: true});    
-
-    res.bookings = await getTripBookingsBasicInfo(tripId);
-    res.expenses = await getTripExpensesBasicInfo(tripId);
-    res.tickets = await getTripTicketsBasicInfo(tripId);
-    res.activities = await getTripActivitiesBasicInfo(tripId);
-    res.notes = await getTripNotesBasicInfo(tripId);
-
-    return res ;
+    const tripResponse = await getTripByIdWithDetails(tripId);
+ 
+    return tripResponse;
  }
 
  async function createTrip(trip, accountId){
@@ -178,6 +170,20 @@ async function getTrips(accountId){
     //await db.Trip.destroy({where:{id: tripId}});
  
    return "Ok";
+ }
+
+ async function getTripByIdWithDetails(tripId){
+    var tripResponse = await getTripByIdBasic(tripId); 
+
+    var res = tripResponse.get({plain: true});    
+
+    res.bookings = await getTripBookingsBasicInfo(tripId);
+    res.expenses = await getTripExpensesBasicInfo(tripId);
+    res.tickets = await getTripTicketsBasicInfo(tripId);
+    res.activities = await getTripActivitiesBasicInfo(tripId);
+    res.notes = await getTripNotesBasicInfo(tripId);
+
+    return res ;
  }
 
  async function getTripDay(tripId, date, accountId){
