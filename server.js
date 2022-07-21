@@ -24,6 +24,7 @@ app.use('/tickets', require('./tickets/ticket.controller'));
 app.use('/bookings', require('./bookings/bookings.controller'));
 app.use('/activities', require('./activities/activities.controller'));
 app.use('/categories', require('./categories/category.controller'));
+app.use('/currencies', require('./currencies/currency.controller'));
 
 app.use(errorHandler);
 
