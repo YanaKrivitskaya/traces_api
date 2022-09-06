@@ -11,6 +11,7 @@ const upload = multer({ storage: multer.memoryStorage() })
 module.exports = router;
 
 router.get('/', authorize(), getTrips); 
+router.get('/current', authorize(), getCurrentTrip); 
 router.get('/list', authorize(), getTripsList); 
 router.get('/:id', authorize(), getTripById);
 router.get('/:id/day/:date', authorize(), getTripDay); 
@@ -29,6 +30,12 @@ function getTripsList(req, res, next){
 function getTrips(req, res, next){
     tripsService.getTrips(req.user.id)
     .then((trips) => res.json({trips}))
+    .catch(next);
+}
+
+function getCurrentTrip(req, res, next){
+    tripsService.getCurrentTrip(req.user.id)
+    .then((trip) => res.json({trip}))
     .catch(next);
 }
 

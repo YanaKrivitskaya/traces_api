@@ -16,7 +16,8 @@ module.exports = {
     userOwnsTrip,    
     updateTripImage,
     getTripDay,
-    getTripsList
+    getTripsList,
+    getCurrentTrip
 }
 
 async function getTrips(accountId){
@@ -35,6 +36,40 @@ async function getTrips(accountId){
         ]
     });
  
+    return tripsResponse;
+ }
+
+ async function getCurrentTrip(accountId){
+    const account = await auth.getAccountById(accountId);
+
+    var today = new Date();
+    var date = moment(today);
+
+    const tripsResponse = await db.Trip.findOne({
+        attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
+        where: {
+            [Op.and]:[
+                {
+                    startDate: {
+                        [Op.lt]: date                        
+                    },
+                    endDate: {                        
+                        [Op.gt]: date
+                    },
+                    createdBy: accountId
+                }
+               ]
+           },
+        include:[
+            {
+                model: db.User,
+                as: "users",
+                attributes: ["id", "accountId", "name"],
+                through: {attributes: []},
+            }
+        ]  
+    });   
+    
     return tripsResponse;
  }
 
