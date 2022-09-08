@@ -35,7 +35,7 @@ function getTrips(req, res, next){
 
 function getCurrentTrip(req, res, next){
     tripsService.getCurrentTrip(req.user.id)
-    .then((trip) => res.json({trip}))
+    .then(({tripsResponse, tripDay}) => res.json({tripsResponse, tripDay}))
     .catch(next);
 }
 

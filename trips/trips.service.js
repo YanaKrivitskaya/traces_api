@@ -69,8 +69,15 @@ async function getTrips(accountId){
             }
         ]  
     });   
-    
-    return tripsResponse;
+
+    const tripDay = await getTripDay(tripsResponse.id, date, accountId);
+
+   /* var res = tripsResponse.get({plain: true});
+    res.activities = events.activities;
+    res.bookings = events.bookings;
+    res.tickets = events.tickets;*/
+       
+    return {tripsResponse, tripDay};
  }
 
  async function getTripsList(accountId){
