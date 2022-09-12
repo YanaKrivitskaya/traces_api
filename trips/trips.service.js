@@ -45,7 +45,7 @@ async function getTrips(accountId){
     var today = new Date();
     var date = moment(today);
 
-    const tripsResponse = await db.Trip.findOne({
+    var tripsResponse = await db.Trip.findOne({
         attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
         where: {
             [Op.and]:[
@@ -68,15 +68,39 @@ async function getTrips(accountId){
                 through: {attributes: []},
             }
         ]  
-    });   
+    });
 
-    const tripDay = await getTripDay(tripsResponse.id, date, accountId);
+    var tripDay = null;
+    
+    if (tripsResponse == null) {
+        tripsResponse = await db.Trip.findOne({
+            order: [['startDate', 'ASC']],
+            attributes: ["id", "createdBy", "name", "description", "coverImage", "startDate", "endDate"], 
+            where: {
+                [Op.and]:[
+                    {
+                        startDate: {
+                            [Op.gt]: date                        
+                        },
+                        createdBy: accountId
+                    }
+                   ]
+               },
+            include:[
+                {
+                    model: db.User,
+                    as: "users",
+                    attributes: ["id", "accountId", "name"],
+                    through: {attributes: []},
+                }
+            ]  
+        });
 
-   /* var res = tripsResponse.get({plain: true});
-    res.activities = events.activities;
-    res.bookings = events.bookings;
-    res.tickets = events.tickets;*/
-       
+        if(tripsResponse == null) {return {tripsResponse, tripDay};}
+    }
+
+    tripDay = await getTripDay(tripsResponse.id, date, accountId);
+          
     return {tripsResponse, tripDay};
  }
 
